@@ -184,11 +184,11 @@ namespace LiveSplit.Thief1
                 {
                     SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
                     container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress.ToInt32() + 0x177A0, 6);
+                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x177A0, 6);
                     container.AddWriteToVariable("IsLoading", 1);
                     container.AddByteCode(new byte[] { 0x81, 0xEC, 0x84, 0x0A, 0x00, 0x00 });
                     container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress.ToInt32() + 0x18302, 7);
+                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x18302, 7);
                     container.AddWriteToVariable("IsLoading", 0);
                     container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x8C, 0x0A, 0x00, 0x00 });
                     container.CloseInjection("LoadEnd");
@@ -200,11 +200,11 @@ namespace LiveSplit.Thief1
                 {
                     SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
                     container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress.ToInt32() + 0x17306, 6);
+                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x17306, 6);
                     container.AddWriteToVariable("IsLoading", 1);
                     container.AddByteCode(new byte[] { 0x81, 0xEC, 0x84, 0x09, 0x00, 0x00 });
                     container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress.ToInt32() + 0x17EF6, 7);
+                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x17EF6, 7);
                     container.AddWriteToVariable("IsLoading", 0);
                     container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x8C, 0x09, 0x00, 0x00 });
                     container.CloseInjection("LoadEnd");
@@ -223,11 +223,11 @@ namespace LiveSplit.Thief1
 
             if(_isLoadingPtr == null && injection != null)
             {
-                int address = injection.getVariableAdress("IsLoading");
-                if(address != 0)
+                IntPtr address = injection.GetVariableAdress("IsLoading");
+                if(address != (IntPtr)0)
                 {
                     Debug.WriteLine("[NoLoads] Injected and reading from variable at: 0x" + address.ToString("X4"));
-                    _isLoadingPtr = new DeepPointer(address);
+                    _isLoadingPtr = new DeepPointer(address.ToInt32());
 
                 }
 

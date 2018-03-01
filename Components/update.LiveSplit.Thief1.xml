@@ -1,4 +1,12 @@
 <updates>
+<update version="1.0.1">
+<files>
+<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
+</files>
+<changelog>
+<change>Migrated write, alloc functions to LiveSplit\'s ComponentUtil Extensions in hopes that solves issues with reading from memory, when the game's process is allocated past first 32bit of memory.</change>
+</changelog>
+</update>
 <update version="1.0.0">
 <files>
 <file path="Components/LiveSplit.Thief1.dll" status="changed"/>

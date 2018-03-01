@@ -51,7 +51,7 @@ namespace SuisCodeInjection
         /// </summary>
         public CodeInjectionResult Result { get; }
         private Process process;
-        private Int32 alocAdress;
+        private IntPtr alocAdress;
 
         private CodeInjectionMasterContainer Container;
 
@@ -69,7 +69,7 @@ namespace SuisCodeInjection
         {
             foreach(var element in Container.Detours)
             {
-                if(element.Value.MasterContainerJmpBackLocation == 0)
+                if(element.Value.MasterContainerJmpBackLocation == (IntPtr)0)
                     throw new Exception("Injection " + element.Key + " not closed!");
             }
         }
@@ -90,46 +90,30 @@ namespace SuisCodeInjection
                 return CodeInjectionResult.ProcessNotFound;
             }
 
-            uint pID = (uint)process.Id;
-
-            Int32 procHandle = OpenProcess((0x2 | 0x8 | 0x10 | 0x20 | 0x400), 1, pID);
-            if(procHandle == INTPTR_ZERO)
-            {
-                return CodeInjectionResult.FailedToOpenProcess;
-            }
-
-            Int32 lpLLAddress = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
-            if(lpLLAddress == INTPTR_ZERO)
-            {
-                return CodeInjectionResult.FailedToGetProcAddress;
-            }
-
-            uint lenght = (uint)Container.GetBytes().Length;
-
             byte[] fullInjectedCode = Container.GetBytes();
 
-            Int32 lpAddress = VirtualAllocEx(procHandle, INTPTR_ZERO, (Int32)512, (0x1000 | 0x2000), 0X40);      //could try taking alloc less memory?
-            alocAdress = lpAddress;
-            Debug.WriteLine("Allocation address: " + alocAdress.ToString("X4"));
-
-            if (lpAddress == INTPTR_ZERO)
+            IntPtr address = ExtensionMethods.AllocateMemory(process, 512);
+            if(address == null)
             {
                 return CodeInjectionResult.FailedToVirtualAlloc;
             }
+            alocAdress = address;
 
-            if (WriteProcessMemory(procHandle, lpAddress, fullInjectedCode, (uint)fullInjectedCode.Length, 0) == 0)
+            if(!ExtensionMethods.WriteBytes(process, address, fullInjectedCode))
             {
                 return CodeInjectionResult.FailedToWriteInstructionToMemory;
+
             }
 
             //Replace temp return addresses with proper ones
             foreach(var Detour in Container.Detours)
             {
-                int LocationOfReturnJump = alocAdress+Detour.Value.MasterContainerJmpBackLocation;
-                byte[] backAddy = BitConverter.GetBytes(Detour.Value.InjectionPoint + Detour.Value.OverridenBytes - (LocationOfReturnJump + 4));
-                if(WriteProcessMemory(procHandle, LocationOfReturnJump, backAddy, 4, 0) == 0)
+                IntPtr LocationOfReturnJump = IntPtr.Add(alocAdress, Detour.Value.MasterContainerJmpBackLocation.ToInt32());
+                byte[] backAddy = BitConverter.GetBytes(Detour.Value.InjectionPoint.ToInt32() + Detour.Value.OverridenBytes - (LocationOfReturnJump.ToInt32() + 4));
+                if(!ExtensionMethods.WriteBytes(process, LocationOfReturnJump, backAddy))
                 {
                     return CodeInjectionResult.FailedToWriteInstructionToMemory;
+
                 }
             }
 
@@ -138,10 +122,8 @@ namespace SuisCodeInjection
             {
                 foreach(var variableUse in variable.Value.VariableUsage)
                 {
-                    if(WriteProcessMemory(procHandle, alocAdress + variableUse, BitConverter.GetBytes(alocAdress + variable.Value.VariableLocation), 4, 0) == 0)
-                    {
+                    if(!ExtensionMethods.WriteBytes(process, IntPtr.Add(alocAdress, variableUse.ToInt32()), BitConverter.GetBytes(alocAdress.ToInt32() + variable.Value.VariableLocation.ToInt32())))
                         return CodeInjectionResult.FailedToWriteInstructionToMemory;
-                    }
                 }
             }
 
@@ -154,30 +136,26 @@ namespace SuisCodeInjection
                     DetourInstruction[i] = 0x90; //Nop
                 }
 
-                int LocationOfDetourJMP = Detour.Value.InjectionPoint;
-                byte[] backAddy = BitConverter.GetBytes(alocAdress + Detour.Value.MasterContainerStartLocation - (Detour.Value.InjectionPoint +5));
+                IntPtr LocationOfDetourJMP = Detour.Value.InjectionPoint;
+                byte[] backAddy = BitConverter.GetBytes(alocAdress.ToInt32() + Detour.Value.MasterContainerStartLocation.ToInt32() - (Detour.Value.InjectionPoint.ToInt32() +5));
                 backAddy.CopyTo(DetourInstruction, 1);
-                if(WriteProcessMemory(procHandle, LocationOfDetourJMP, DetourInstruction, Detour.Value.OverridenBytes, 0) == 0)
-                {
+                if(!ExtensionMethods.WriteBytes(process, LocationOfDetourJMP, DetourInstruction))
                     return CodeInjectionResult.FailedToWriteInstructionToMemory;
-                }
             }
-
-            CloseHandle(procHandle);
             
             return CodeInjectionResult.Success;
         }
 
-        public int getVariableAdress(string Name, bool Absolute = false)
+        public IntPtr GetVariableAdress(string Name, bool Absolute = false)
         {
             if(!Container.Variables.Keys.Contains(Name))
                 throw new Exception("No variable to access!");
 
-            Int32 offset = Container.Variables[Name].VariableLocation;
+            IntPtr offset = Container.Variables[Name].VariableLocation;
             if(Absolute)
-                return alocAdress + offset;
+                return IntPtr.Add(alocAdress, offset.ToInt32());
             else
-                return alocAdress + offset - process.MainModuleWow64Safe().BaseAddress.ToInt32();
+                return IntPtr.Add(alocAdress, offset.ToInt32()) - process.MainModuleWow64Safe().BaseAddress.ToInt32();
         }
 
         #region StaticStuffToHelp

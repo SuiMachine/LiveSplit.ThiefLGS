@@ -11,21 +11,21 @@ namespace SuisCodeInjection
     {
         public struct DetoursStruct
         {
-            public Int32 InjectionPoint { get; private set; }
+            public IntPtr InjectionPoint { get; private set; }
             public byte OverridenBytes { get; set; }
-            public Int32 MasterContainerStartLocation { get; private set; }
-            public Int32 MasterContainerJmpBackLocation { get; set; }
+            public IntPtr MasterContainerStartLocation { get; private set; }
+            public IntPtr MasterContainerJmpBackLocation { get; set; }
 
-            public DetoursStruct(Int32 InjectionPoint, byte OverridenBytes, Int32 MasterContainerStartLocation)
+            public DetoursStruct(IntPtr InjectionPoint, byte OverridenBytes, IntPtr MasterContainerStartLocation)
             {
                 this.InjectionPoint = InjectionPoint;
                 this.OverridenBytes = OverridenBytes;
                 this.MasterContainerStartLocation = MasterContainerStartLocation;
-                this.MasterContainerJmpBackLocation = 0;
+                this.MasterContainerJmpBackLocation = (IntPtr)0;
             }
 
 
-            public DetoursStruct(Int32 InjectionPoint, byte OverridenBytes, Int32 MasterContainerStartLocation, Int32 MasterContainerJmpBackLocation)
+            public DetoursStruct(IntPtr InjectionPoint, byte OverridenBytes, IntPtr MasterContainerStartLocation, IntPtr MasterContainerJmpBackLocation)
             {
                 this.InjectionPoint = InjectionPoint;
                 this.OverridenBytes = OverridenBytes;
@@ -36,15 +36,15 @@ namespace SuisCodeInjection
 
         public struct VariableStruct
         {
-            public Int32 VariableLocation { get; private set; }
+            public IntPtr VariableLocation { get; private set; }
             public int VariableLenght { get; private set; }
-            public List<Int32> VariableUsage { get; private set; }
+            public List<IntPtr> VariableUsage { get; private set; }
 
-            public VariableStruct(Int32 VariableLocation, int VariableLenght)
+            public VariableStruct(IntPtr VariableLocation, int VariableLenght)
             {
                 this.VariableLocation = VariableLocation;
                 this.VariableLenght = VariableLenght;
-                VariableUsage = new List<Int32>();
+                VariableUsage = new List<IntPtr>();
             }
         }
 
@@ -70,7 +70,7 @@ namespace SuisCodeInjection
             if(Variables.Keys.Contains(Name))
                 throw new Exception("Variable under this name is already specified");
 
-            Variables.Add(Name, new VariableStruct(ByteOpCodes.Count, 4));
+            Variables.Add(Name, new VariableStruct((IntPtr)ByteOpCodes.Count, 4));
             ByteOpCodes.AddRange(BitConverter.GetBytes(Value));
         }
 
@@ -91,7 +91,7 @@ namespace SuisCodeInjection
             else
             {
                 ByteOpCodes.AddRange(new byte[] { 0xC7, 0x05 });  //mov to absolute address, value
-                Variables[name].VariableUsage.Add(ByteOpCodes.Count);
+                Variables[name].VariableUsage.Add((IntPtr)ByteOpCodes.Count);
                 ByteOpCodes.AddRange(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });  //address
                 ByteOpCodes.AddRange(BitConverter.GetBytes(Value));  //value
             }
@@ -99,13 +99,13 @@ namespace SuisCodeInjection
         #endregion
 
         #region DetoursCreationAndCode
-        public void AddInjectionPoint(string Name, Int32 InjectionPoint, byte OverridenBytes)
+        public void AddInjectionPoint(string Name, IntPtr InjectionPoint, byte OverridenBytes)
         {
             if(Detours.Keys.Contains(Name))
                 throw new Exception("Detour under the name " + Name + " already exists!");
 
 
-            Detours.Add(Name, new DetoursStruct(InjectionPoint, OverridenBytes, ByteOpCodes.Count));
+            Detours.Add(Name, new DetoursStruct(InjectionPoint, OverridenBytes, (IntPtr)ByteOpCodes.Count));
         }
 
         public void AddByteCode(byte[] code)
@@ -118,7 +118,7 @@ namespace SuisCodeInjection
             if(Detours.Keys.Contains(Name))
             {
                 var oldDetour = Detours[Name];
-                Detours[Name] = new DetoursStruct(oldDetour.InjectionPoint, oldDetour.OverridenBytes, oldDetour.MasterContainerStartLocation, ByteOpCodes.Count +1);
+                Detours[Name] = new DetoursStruct(oldDetour.InjectionPoint, oldDetour.OverridenBytes, oldDetour.MasterContainerStartLocation, (IntPtr)ByteOpCodes.Count +1);
                 ByteOpCodes.Add(0xE9);
                 ByteOpCodes.AddRange(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });
             }
