@@ -1,0 +1,10 @@
+<updates>
+<update version="0.9.1">
+<files>
+<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
+</files>
+<changelog>
+<change>Initial release.</change>
+</changelog>
+</update>
+</updates>
