@@ -400,9 +400,36 @@ namespace LiveSplit.Thief1
                         _levelName = new DeepPointer(0x4030A0);
                     }
                 }
+                else if(ExeVersion == "1.37")
+                {
+                    //OldDark DDfixed
+                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.37");
+                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
+                    container.AddVariable("IsLoading", 0);
+                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x8A70, 6);
+                    container.AddWriteToVariable("IsLoading", 1);
+                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x28, 0x04, 0x00, 0x00 });
+                    container.CloseInjection("LoadStart");
+                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x8D08, 6);
+                    container.AddWriteToVariable("IsLoading", 0);
+                    container.AddByteCode(new byte[] { 0x81, 0xC4, 0x28, 0x04, 0x00, 0x00 });
+                    container.CloseInjection("LoadEnd");
+                    injection = new SuisCodeInjection.CodeInjection(game, container);
+
+                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
+                    {
+                        MessageBox.Show("Failed to inject the code: " + injection.Result);
+                        _ignorePIDs.Add(game.Id);
+                        return null;
+                    }
+                    else
+                    {
+                        _levelName = new DeepPointer(0x2790CC);
+                    }
+                }
                 else
                 {
-                    MessageBox.Show("Unrecognized version of EXE. Supported versions are NewDark 1.22 (TFix 1.20) and 1.25 (TFix 1.25d)");
+                    MessageBox.Show("Unrecognized version of EXE. Supported versions are NewDark 1.22 (TFix 1.20), 1.25 (TFix 1.25d) and 1.37 (OldDark).");
                     _ignorePIDs.Add(game.Id);
                     return null;
                 }
