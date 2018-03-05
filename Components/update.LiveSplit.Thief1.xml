@@ -1,4 +1,22 @@
 <updates>
+<update version="1.1.0">
+<files>
+<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
+</files>
+<changelog>
+<change>Added reading map name from memory.</change>
+<change>Added auto-splitting together with options.</change>
+<change>Added auto-start option.</change>
+</changelog>
+</update>
+<update version="1.0.0">
+<files>
+<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
+</files>
+<changelog>
+<change>Initial release.</change>
+</changelog>
+</update>
 <update version="1.0.1">
 <files>
 <file path="Components/LiveSplit.Thief1.dll" status="changed"/>
