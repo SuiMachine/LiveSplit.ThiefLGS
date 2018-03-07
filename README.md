@@ -11,9 +11,11 @@ Requirements
 ------------
 
   * Thief: Gold (or The Dark Project) in versions
-    * 1.22 (TFix 1.20)
-	* 1.25 (TFix 1.25d)
-	* 1.37 (Old Dark)
+	* NewDark 1.22 (TFix 1.20)
+	* NewDark 1.23
+	* NewDark 1.25 (TFix 1.25d)
+	* OldDark 1.18
+	* OldDark 1.37
   * LiveSplit 1.5+
   * .NET Framework 4.5 
 
