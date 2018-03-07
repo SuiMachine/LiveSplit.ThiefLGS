@@ -333,7 +333,7 @@ namespace LiveSplit.Thief1
 
         Process GetGameProcess()
         {
-            Process game = Process.GetProcesses().FirstOrDefault(p => (p.ProcessName.ToLower() == "thief" || p.ProcessName.ToLower() == "thief2") && !p.HasExited && !_ignorePIDs.Contains(p.Id));
+            Process game = Process.GetProcesses().FirstOrDefault(p => (p.ProcessName.ToLower() == "thief") && !p.HasExited && !_ignorePIDs.Contains(p.Id));
 
 
             if (game == null)
