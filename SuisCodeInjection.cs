@@ -55,6 +55,11 @@ namespace SuisCodeInjection
 
         private CodeInjectionMasterContainer Container;
 
+        /// <summary>
+        /// Performs a Code Injection.
+        /// </summary>
+        /// <param name="process">Process you want to inject the code to.</param>
+        /// <param name="Container">CodeInjectionMasterContainer to inject. Create the object before the injection!</param>
         public CodeInjection(Process process, CodeInjectionMasterContainer Container)
         {
             this.process = process;
@@ -65,6 +70,9 @@ namespace SuisCodeInjection
             Result = Inject();
         }
 
+        /// <summary>
+        /// Checks if all injections have been closed.
+        /// </summary>
         private void Validate()
         {
             foreach(var element in Container.Detours)
@@ -146,6 +154,12 @@ namespace SuisCodeInjection
             return CodeInjectionResult.Success;
         }
 
+        /// <summary>
+        /// Calculates and returns the Variable adress.
+        /// </summary>
+        /// <param name="Name">The name of the variable to return.</param>
+        /// <param name="Absolute">Specifies whatever the function should return relative adress or absolute one.</param>
+        /// <returns>Adress of the variable in process' memory</returns>
         public IntPtr GetVariableAdress(string Name, bool Absolute = false)
         {
             if(!Container.Variables.Keys.Contains(Name))

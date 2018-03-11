@@ -11,32 +11,10 @@ namespace LiveSplit.Thief1
 {
     class GameMemory
     {
-
-        public enum SplitArea : int
-        {
-            None,
-            l01,
-            l02,
-            l03,
-            l04,
-            l05,
-            l05b,
-            l06,
-            l07,
-            l07b,
-            l08,
-            l08b,
-            l09,
-            l10,
-            l11,
-            l12,
-            l13,
-        }
-
         public event EventHandler OnPlayerGainedControl;
         public event EventHandler OnLoadStarted;
         public event EventHandler OnLoadFinished;
-        public delegate void SplitCompletedEventHandler(object sender, SplitArea type, uint frame);
+        public delegate void SplitCompletedEventHandler(object sender, int SplitIndex, uint frame);
         public event SplitCompletedEventHandler OnSplitCompleted;
 
 
@@ -52,10 +30,11 @@ namespace LiveSplit.Thief1
         private SuisCodeInjection.CodeInjection injection;
 
         public bool[] SplitStates { get; set; }
+        public int TotalSplits { get; set; }
 
         public void ResetSplitStates()
         {
-            for(int i = 0; i <= (int)SplitArea.l13; i++)
+            for(int i = 0; i < SplitStates.Length; i++)
             {
                 SplitStates[i] = false;
             }
@@ -85,7 +64,7 @@ namespace LiveSplit.Thief1
         public GameMemory(Thief1Settings componentSettings)
         {
             _settings = componentSettings;
-            SplitStates = new bool[(int)SplitArea.l13 + 1];
+            SplitStates = new bool[_settings.TotalSplits+1];
             ResetSplitStates();
 
             _ignorePIDs = new List<int>();
@@ -216,74 +195,6 @@ namespace LiveSplit.Thief1
                         if(CurrentMap != prevMap && CurrentMap != "")
                         {
                             Debug.WriteLine("[NOLOADS] Map changed from \"" + prevMap + "\" to \"" + CurrentMap + "\"");
-
-                            if(prevMap == MapNames.mission01_A_Keepers_Training && CurrentMap == MapNames.mission02_Lord_Baffords_Manor)
-                            {
-                                Split(SplitArea.l01, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission02_Lord_Baffords_Manor && CurrentMap == MapNames.mission03_Break_From_Cragscleft_Prison)
-                            {
-                                Split(SplitArea.l02, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission03_Break_From_Cragscleft_Prison && CurrentMap == MapNames.mission04_Down_In_The_Bonehoard)
-                            {
-                                Split(SplitArea.l03, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission04_Down_In_The_Bonehoard && CurrentMap == MapNames.mission05_Assassins)
-                            {
-                                Split(SplitArea.l04, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission05_Assassins && (CurrentMap == MapNames.mission05Gold_ThievesGuild || CurrentMap == MapNames.mission06_TheSword))
-                            {
-                                Split(SplitArea.l05, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission05Gold_ThievesGuild && CurrentMap == MapNames.mission06_TheSword)
-                            {
-                                Split(SplitArea.l05b, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission06_TheSword && CurrentMap == MapNames.mission07_The_Haunted_Cathedral)
-                            {
-                                Split(SplitArea.l06, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission07_The_Haunted_Cathedral && (CurrentMap == MapNames.mission08_TheLostCity || CurrentMap == MapNames.mission07Gold_MagesTowers))
-                            {
-                                Split(SplitArea.l07, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission07Gold_MagesTowers && CurrentMap == MapNames.mission08_TheLostCity)
-                            {
-                                Split(SplitArea.l07b, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission08_TheLostCity && (CurrentMap == MapNames.mission09_Undercover || CurrentMap == MapNames.mission08Gold_Song_Of_The_Caverns))
-                            {
-                                Split(SplitArea.l08, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission08Gold_Song_Of_The_Caverns && CurrentMap == MapNames.mission09_Undercover)
-                            {
-                                Split(SplitArea.l08b, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission09_Undercover && CurrentMap == MapNames.mission10_Return_To_The_Cathedral)
-                            {
-                                Split(SplitArea.l09, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission10_Return_To_The_Cathedral && CurrentMap == MapNames.mission11_Escape)
-                            {
-                                Split(SplitArea.l10, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission11_Escape && CurrentMap == MapNames.mission12_Strange_Bedfellows)
-                            {
-                                Split(SplitArea.l11, frameCounter);
-                            }
-                            else if(prevMap == MapNames.mission12_Strange_Bedfellows && CurrentMap == MapNames.mission13_Into_the_Maw_of_Chaos)
-                            {
-                                Split(SplitArea.l12, frameCounter);
-                            }
-                            /*
-                            else if(prevMap == MapNames.mission13_Into_the_Maw_of_Chaos && CurrentMap == MapNames.mission11_Escape)
-                            {
-                                Split(SplitArea.l13, frameCounter);
-                            }*/
-
-
                         }
 
                         prevMap = CurrentMap;
@@ -317,14 +228,14 @@ namespace LiveSplit.Thief1
             }
         }
 
-        private void Split(SplitArea split, uint frame)
+        private void Split(int SplitIndex, uint frame)
         {
-            Debug.WriteLine(String.Format("[NoLoads] split {0} - {1}", split, frame));
+            Debug.WriteLine(String.Format("[NoLoads] split {0} - {1}", SplitIndex, frame));
             _uiThread.Post(d =>
             {
                 if(this.OnSplitCompleted != null)
                 {
-                    this.OnSplitCompleted(this, split, frame);
+                    this.OnSplitCompleted(this, SplitIndex, frame);
                 }
             }, null);
         }

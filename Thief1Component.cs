@@ -98,31 +98,14 @@ namespace LiveSplit.Thief1
             _state.IsGameTimePaused = false;
         }
 
-        void gameMemory_OnSplitCompleted(object sender, GameMemory.SplitArea split, uint frame)
+        void gameMemory_OnSplitCompleted(object sender, int splitindex, uint frame)
         {
-            Debug.WriteLineIf(split != GameMemory.SplitArea.None, String.Format("[NoLoads] Trying to split {0}, State: {1} - {2}", split, _gameMemory.SplitStates[(int)split], frame));
-            if(_state.CurrentPhase == TimerPhase.Running && !_gameMemory.SplitStates[(int)split] &&
-                ((split == GameMemory.SplitArea.l01 && this.Settings.L01) ||
-                (split == GameMemory.SplitArea.l02 && this.Settings.L02) ||
-                (split == GameMemory.SplitArea.l03 && this.Settings.L03) ||
-                (split == GameMemory.SplitArea.l04 && this.Settings.L04) ||
-                (split == GameMemory.SplitArea.l05 && this.Settings.L05) ||
-                (split == GameMemory.SplitArea.l05b && this.Settings.L05b) ||
-                (split == GameMemory.SplitArea.l06 && this.Settings.L06) ||
-                (split == GameMemory.SplitArea.l07 && this.Settings.L07) ||
-                (split == GameMemory.SplitArea.l07b && this.Settings.L07b) ||
-                (split == GameMemory.SplitArea.l08 && this.Settings.L08) ||
-                (split == GameMemory.SplitArea.l08b && this.Settings.L08b) ||
-                (split == GameMemory.SplitArea.l09 && this.Settings.L09) ||
-                (split == GameMemory.SplitArea.l10 && this.Settings.L10) ||
-                (split == GameMemory.SplitArea.l11 && this.Settings.L11) ||
-                (split == GameMemory.SplitArea.l12 && this.Settings.L12) ||
-                (split == GameMemory.SplitArea.l13 && this.Settings.L13)
-                ))
+            Debug.WriteLineIf(splitindex != 0, String.Format("[NoLoads] Trying to split {0}, State: {1} - {2}", splitindex, _gameMemory.SplitStates[splitindex], frame));
+            if(_state.CurrentPhase == TimerPhase.Running && !_gameMemory.SplitStates[splitindex])
             {
-                Trace.WriteLine(String.Format("[NoLoads] {0} Split - {1}", split, frame));
+                Trace.WriteLine(String.Format("[NoLoads] {0} Split - {1}", splitindex, frame));
                 _timer.Split();
-                _gameMemory.SplitStates[(int)split] = true;
+                _gameMemory.SplitStates[splitindex] = true;
             }
         }
 
