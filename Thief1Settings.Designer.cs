@@ -211,6 +211,7 @@
             this.ChkList_Splits.Name = "ChkList_Splits";
             this.ChkList_Splits.Size = new System.Drawing.Size(458, 499);
             this.ChkList_Splits.TabIndex = 5;
+            this.ChkList_Splits.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ChkList_Splits_ItemCheck);
             // 
             // tableLayoutPanel3
             // 
@@ -234,7 +235,7 @@
             this.ComboBox_SplitPresets.Location = new System.Drawing.Point(50, 3);
             this.ComboBox_SplitPresets.Name = "ComboBox_SplitPresets";
             this.ComboBox_SplitPresets.Size = new System.Drawing.Size(405, 21);
-            this.ComboBox_SplitPresets.TabIndex = (int)Presets.Custom;
+            this.ComboBox_SplitPresets.TabIndex = 3;
             // 
             // label1
             // 

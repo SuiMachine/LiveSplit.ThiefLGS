@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using System.Diagnostics;
 
 namespace LiveSplit.Thief1
 {
@@ -41,11 +42,13 @@ namespace LiveSplit.Thief1
         public bool AutoRestart { get; set; }
         public bool AutoStart { get; set; }
         public int TotalSplits { get; set; }
+        public LevelRow[] CurrentSplits { get; set; }
 
         private const bool DEFAULT_AUTORESET = false;
         private const bool DEFAULT_AUTOSTART = true;
+        private bool SplitsChanged = false;
 
-        private List<LevelRow> thief1Rows = new List<LevelRow>() {
+        private LevelRow[] thief1Rows = new LevelRow[] {
             new LevelRow(true, "miss1"),
             new LevelRow(true, "miss2"),
             new LevelRow(true, "miss3"),
@@ -61,7 +64,7 @@ namespace LiveSplit.Thief1
             new LevelRow(true, "miss13")
         };
 
-        private List<LevelRow> thiefRow = new List<LevelRow>() {
+        private LevelRow[] thief1RowsNoLeadingZero = new LevelRow[] {
             new LevelRow(true, "miss1"),
             new LevelRow(true, "miss2"),
             new LevelRow(true, "miss3"),
@@ -89,6 +92,7 @@ namespace LiveSplit.Thief1
             this.CB_Autorestart.DataBindings.Add("Checked", this, "AutoRestart", false, DataSourceUpdateMode.OnPropertyChanged);
         }
 
+
         public XmlNode GetSettings(XmlDocument doc)
         {
             XmlElement settingsNode = doc.CreateElement("Settings");
@@ -98,17 +102,37 @@ namespace LiveSplit.Thief1
             settingsNode.AppendChild(ToElement(doc, "AutoReset", this.AutoRestart));
             settingsNode.AppendChild(ToElement(doc, "AutoStart", this.AutoStart));
             settingsNode.AppendChild(ToElement(doc, "TotalSplits", this.TotalSplits));
+            settingsNode.AppendChild(ToNodeArray(doc, "SplitsNode", this.CurrentSplits));
+            if(SplitsChanged)
+                UpdateSplitsArray();
 
             return settingsNode;
         }
 
+        private void UpdateSplitsArray()
+        {
+            CurrentSplits = new LevelRow[ChkList_Splits.Items.Count];
+
+            for(int i=0; i<ChkList_Splits.Items.Count; i++)
+            {
+                string item = ChkList_Splits.Items[i].ToString();
+                CurrentSplits[i] = new LevelRow(ChkList_Splits.CheckedIndices.Contains(i), item);
+            }
+            SplitsChanged = false;
+        }
+
+
+
         public void SetSettings(XmlNode settings)
         {
-
             this.AutoRestart = ParseBool(settings, "AutoReset", DEFAULT_AUTORESET);
             this.AutoStart = ParseBool(settings, "AutoStart", DEFAULT_AUTOSTART);
             this.TotalSplits = ParseInt(settings, "TotalSplits");
+            this.CurrentSplits = ParseSplits(settings, "SplitsNode");
+            this.ChkList_Splits.Fill(CurrentSplits);
         }
+
+
 
         static bool ParseBool(XmlNode settings, string setting, bool default_ = false)
         {
@@ -124,10 +148,44 @@ namespace LiveSplit.Thief1
                 : default_;
         }
 
+        static LevelRow[] ParseSplits(XmlNode settings, string setting)
+        {
+            List<LevelRow> tempLst = new List<LevelRow>();
+            if(settings[setting] == null)
+                return tempLst.ToArray();
+
+            foreach(XmlNode element in settings[setting].ChildNodes)
+            {
+                string tempMapName = element.Name;
+                bool tempCheck = false;
+                if(element.Attributes["Checked"] != null)
+                    tempCheck = bool.TryParse(element.Attributes["Checked"].InnerText, out bool parseRes) ? parseRes : false;
+                tempLst.Add(new LevelRow(tempCheck, tempMapName));
+            }
+            return tempLst.ToArray();
+        }
+
         static XmlElement ToElement<T>(XmlDocument document, string name, T value)
         {
             XmlElement str = document.CreateElement(name);
             str.InnerText = value.ToString();
+            return str;
+        }
+
+        static XmlElement ToNodeArray(XmlDocument document, string name, LevelRow[] value)
+        {
+            XmlElement str = document.CreateElement(name);
+            foreach(var elementOfArray in value)
+            {
+                if(elementOfArray.MapName != "")
+                {
+                    XmlNode child = document.CreateElement(elementOfArray.MapName);
+                    var Checked = document.CreateAttribute("Checked");
+                    Checked.InnerText = elementOfArray.Checked.ToString();
+                    child.Attributes.Append(Checked);
+                    str.AppendChild(child);
+                }
+            }
             return str;
         }
 
@@ -180,6 +238,7 @@ namespace LiveSplit.Thief1
                 ChkList_Splits.Items.Add(tempMap.ToLower(), true);
                 ComboBox_SplitPresets.SelectedIndex = (int)Presets.Custom;
             }
+            SplitsChanged = true;
         }
 
         private void B_SplitEdit_Click(object sender, EventArgs e)
@@ -203,6 +262,7 @@ namespace LiveSplit.Thief1
                     }
                 }
             }
+            SplitsChanged = true;
         }
 
         private void B_SplitRemove_Click(object sender, EventArgs e)
@@ -221,7 +281,7 @@ namespace LiveSplit.Thief1
                     ChkList_Splits.Items.RemoveAt(selectedElement);
                 }
             }
-
+            SplitsChanged = true;
         }
 
         private void B_SplitMoveUp_Click(object sender, EventArgs e)
@@ -245,6 +305,7 @@ namespace LiveSplit.Thief1
                     ChkList_Splits.SelectedIndex = selectedElementIndex - 1;
                 }
             }
+            SplitsChanged = true;
         }
 
         private void B_SplitMoveDown_Click(object sender, EventArgs e)
@@ -268,6 +329,14 @@ namespace LiveSplit.Thief1
                     ChkList_Splits.SelectedIndex = selectedElementIndex + 1;
                 }
             }
+            SplitsChanged = true;
+        }
+        #endregion
+
+        #region ChkListAdditionalEvents
+        private void ChkList_Splits_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            SplitsChanged = true;
         }
         #endregion
     }
@@ -275,7 +344,7 @@ namespace LiveSplit.Thief1
 
     public static class SuisExtensions
     {
-        public static void Fill(this CheckedListBox lBox, List<LevelRow> elements)
+        public static void Fill(this CheckedListBox lBox, LevelRow[] elements)
         {
             lBox.Items.Clear();
             foreach(var element in elements)

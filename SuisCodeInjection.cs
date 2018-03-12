@@ -45,7 +45,6 @@ namespace SuisCodeInjection
         static extern bool ReadProcessMemory(Int32 hProcess, Int32 lpBaseAddress, byte[] buffer, uint size, ref int lpNumberOfBytesToRead);
         #endregion
 
-        static readonly Int32 INTPTR_ZERO = (Int32)0;
         /// <summary>
         /// Result of code injection
         /// </summary>
