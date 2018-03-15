@@ -24,6 +24,7 @@ namespace LiveSplit.Thief1
         private Thief1Settings _settings;
 
         private DeepPointer _isLoadingPtr = null;
+        private DeepPointer _levelCompleteCounter = null;
         private DeepPointer _levelName = null;
         private int StringReadLenght = 6;
 
@@ -100,6 +101,9 @@ namespace LiveSplit.Thief1
         bool isLoading = false;
         bool prevIsLoading = false;
         bool loadingStarted = false;
+        int prevLevelCompletedCounter = 0;
+        int LevelCompletedCounter = 0;
+
         string CurrentMap = "";
         string prevMap = "";
 
@@ -129,9 +133,8 @@ namespace LiveSplit.Thief1
                     while (!game.HasExited)
                     {
                         _isLoadingPtr.Deref(game, out isLoading);
+                        _levelCompleteCounter.Deref(game, out LevelCompletedCounter);
                         CurrentMap = _levelName.DerefString(game, StringReadLenght, "").ToLower();
-
-
 
                         if(isLoading != prevIsLoading)
                         {
@@ -182,7 +185,7 @@ namespace LiveSplit.Thief1
                             }
                         }
 
-                        if(CurrentMap != prevMap && CurrentMap != "")
+                        if(CurrentMap != prevMap && CurrentMap != "" || prevLevelCompletedCounter != LevelCompletedCounter)
                         {
                             for(int i=1; i<Splits.Length; i++)
                             {
@@ -197,6 +200,7 @@ namespace LiveSplit.Thief1
 
                         prevMap = CurrentMap;
                         prevIsLoading = isLoading;
+                        prevLevelCompletedCounter = LevelCompletedCounter;
                         frameCounter++;
 
                         Thread.Sleep(15);
@@ -262,6 +266,7 @@ namespace LiveSplit.Thief1
                     Debug.WriteLine("[NOLOADS] Detected EXE version 1.25");
                     SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
                     container.AddVariable("IsLoading", 0);
+                    container.AddVariable("Counter", 0);
                     container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x177A0, 6);
                     container.AddWriteToVariable("IsLoading", 1);
                     container.AddByteCode(new byte[] { 0x81, 0xEC, 0x84, 0x0A, 0x00, 0x00 });
@@ -270,6 +275,10 @@ namespace LiveSplit.Thief1
                     container.AddWriteToVariable("IsLoading", 0);
                     container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x8C, 0x0A, 0x00, 0x00 });
                     container.CloseInjection("LoadEnd");
+                    container.AddInjectionPoint("PlayEndCinematic", game.MainModuleWow64Safe().BaseAddress + 0x4D5B7, 6);
+                    container.AddIncrementValue("Counter", 1);
+                    container.AddByteCode(new byte[] { 0x64, 0xA1, 0x00, 0x00, 0x00, 0x00 });
+                    container.CloseInjection("PlayEndCinematic");
                     injection = new SuisCodeInjection.CodeInjection(game, container);
 
                     if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
@@ -281,163 +290,6 @@ namespace LiveSplit.Thief1
                     else
                     {
                         _levelName = new DeepPointer(0x408900);
-                    }
-                }
-                else if(ProductVersion == "1.23")
-                {
-                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.23");
-                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
-                    container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x17306, 6);
-                    container.AddWriteToVariable("IsLoading", 1);
-                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x84, 0x09, 0x00, 0x00 });
-                    container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x17EF6, 7);
-                    container.AddWriteToVariable("IsLoading", 0);
-                    container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x8C, 0x09, 0x00, 0x00 });
-                    container.CloseInjection("LoadEnd");
-                    injection = new SuisCodeInjection.CodeInjection(game, container);
-
-                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
-                    {
-                        MessageBox.Show("Failed to inject the code: " + injection.Result);
-                        _ignorePIDs.Add(game.Id);
-                        return null;
-                    }
-                    else
-                    {
-                        _levelName = new DeepPointer(0x4030A0);
-                    }
-                }
-                else if(ProductVersion == "1.22")
-                {
-                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.22");
-                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
-                    container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x17306, 6);
-                    container.AddWriteToVariable("IsLoading", 1);
-                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x84, 0x09, 0x00, 0x00 });
-                    container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x17EF6, 7);
-                    container.AddWriteToVariable("IsLoading", 0);
-                    container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x8C, 0x09, 0x00, 0x00 });
-                    container.CloseInjection("LoadEnd");
-                    injection = new SuisCodeInjection.CodeInjection(game, container);
-
-                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
-                    {
-                        MessageBox.Show("Failed to inject the code: " + injection.Result);
-                        _ignorePIDs.Add(game.Id);
-                        return null;
-                    }
-                    else
-                    {
-                        _levelName = new DeepPointer(0x4030A0);
-                    }
-                }
-                else if(ProductVersion == "1.21")
-                {
-                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.21");
-                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
-                    container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x168B0, 6);
-                    container.AddWriteToVariable("IsLoading", 1);
-                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x30, 0x04, 0x00, 0x00 });
-                    container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x16BD5, 7);
-                    container.AddWriteToVariable("IsLoading", 0);
-                    container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x3C, 0x04, 0x00, 0x00 });
-                    container.CloseInjection("LoadEnd");
-                    injection = new SuisCodeInjection.CodeInjection(game, container);
-
-                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
-                    {
-                        MessageBox.Show("Failed to inject the code: " + injection.Result);
-                        _ignorePIDs.Add(game.Id);
-                        return null;
-                    }
-                    else
-                    {
-                        _levelName = new DeepPointer(0x3BFF08);
-                    }
-                }
-                else if(ProductVersion == "1.19")
-                {
-                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.19");
-                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
-                    container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x16240, 6);
-                    container.AddWriteToVariable("IsLoading", 1);
-                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x30, 0x04, 0x00, 0x00 });
-                    container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x16565, 7);
-                    container.AddWriteToVariable("IsLoading", 0);
-                    container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x3C, 0x04, 0x00, 0x00 });
-                    container.CloseInjection("LoadEnd");
-                    injection = new SuisCodeInjection.CodeInjection(game, container);
-
-                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
-                    {
-                        MessageBox.Show("Failed to inject the code: " + injection.Result);
-                        _ignorePIDs.Add(game.Id);
-                        return null;
-                    }
-                    else
-                    {
-                        _levelName = new DeepPointer(0x3B84E8);
-                    }
-                }
-                //OldDarks
-                else if(ProductVersion == "1.37")
-                {
-                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.37 (Old Dark)");
-                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
-                    container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x8A70, 6);
-                    container.AddWriteToVariable("IsLoading", 1);
-                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x28, 0x04, 0x00, 0x00 });
-                    container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x8D08, 6);
-                    container.AddWriteToVariable("IsLoading", 0);
-                    container.AddByteCode(new byte[] { 0x81, 0xC4, 0x28, 0x04, 0x00, 0x00 });
-                    container.CloseInjection("LoadEnd");
-                    injection = new SuisCodeInjection.CodeInjection(game, container);
-
-                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
-                    {
-                        MessageBox.Show("Failed to inject the code: " + injection.Result);
-                        _ignorePIDs.Add(game.Id);
-                        return null;
-                    }
-                    else
-                    {
-                        _levelName = new DeepPointer(0x2790CC);
-                    }
-                }
-                else if(ProductVersion == "1.18")
-                {
-                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.18 (Old Dark)");
-                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
-                    container.AddVariable("IsLoading", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0xACA0, 6);      
-                    container.AddWriteToVariable("IsLoading", 1);
-                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x24, 0x04, 0x00, 0x00 });
-                    container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0xAF06, 5);
-                    container.AddWriteToVariable("IsLoading", 0);
-                    container.AddByteCode(new byte[] { 0x8B, 0x44, 0x24, 0x28, 0x5F });
-                    container.CloseInjection("LoadEnd");
-                    injection = new SuisCodeInjection.CodeInjection(game, container);
-
-                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
-                    {
-                        MessageBox.Show("Failed to inject the code: " + injection.Result);
-                        _ignorePIDs.Add(game.Id);
-                        return null;
-                    }
-                    else
-                    {
-                        _levelName = new DeepPointer(0x3BEB00);
                     }
                 }
                 else
@@ -452,10 +304,15 @@ namespace LiveSplit.Thief1
             if(_isLoadingPtr == null && injection != null)
             {
                 IntPtr address = injection.GetVariableAdress("IsLoading");
+                IntPtr addressCounter = injection.GetVariableAdress("Counter");
                 if(address != (IntPtr)0)
                 {
                     Debug.WriteLine("[NoLoads] Injected and reading from variable at: 0x" + address.ToString("X4"));
                     _isLoadingPtr = new DeepPointer(address.ToInt32());
+                }
+                if(addressCounter != (IntPtr)0)
+                {
+                    _levelCompleteCounter = new DeepPointer(addressCounter.ToInt32());
                 }
 
             }

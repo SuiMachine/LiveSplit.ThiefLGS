@@ -124,6 +124,19 @@ namespace SuisCodeInjection
                 ByteOpCodes.AddRange(BitConverter.GetBytes(Value));  //value
             }
         }
+
+        public void AddIncrementValue(string name, byte Value)
+        {
+            if(!Variables.Keys.Contains(name))
+                throw new Exception("No variable specified");
+            else
+            {
+                ByteOpCodes.AddRange(new byte[] { 0x83, 0x05 });  //mov to absolute address, value
+                Variables[name].VariableUsage.Add((IntPtr)ByteOpCodes.Count);
+                ByteOpCodes.AddRange(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF });  //address
+                ByteOpCodes.Add(Value);  //value
+            }
+        }
         #endregion
 
         #region DetoursCreationAndCode
