@@ -35,13 +35,13 @@ namespace LiveSplit.Thief1
             this.Settings = new Thief1Settings();
 
             _timer = new TimerModel { CurrentState = state };
-            _timer.CurrentState.OnStart += timer_OnStart;
+            _timer.CurrentState.OnStart += Timer_OnStart;
 
             _gameMemory = new GameMemory(this.Settings);
-            _gameMemory.OnLoadStarted += gameMemory_OnLoadStarted;
-            _gameMemory.OnLoadFinished += gameMemory_OnLoadFinished;
-            _gameMemory.OnPlayerGainedControl += gameMemory_OnPlayerGainedControl;
-            _gameMemory.OnSplitCompleted += gameMemory_OnSplitCompleted;
+            _gameMemory.OnLoadStarted += GameMemory_OnLoadStarted;
+            _gameMemory.OnLoadFinished += GameMemory_OnLoadFinished;
+            _gameMemory.OnPlayerGainedControl += GameMemory_OnPlayerGainedControl;
+            _gameMemory.OnSplitCompleted += GameMemory_OnSplitCompleted;
 
             state.OnStart += State_OnStart;
             _gameMemory.StartMonitoring();
@@ -52,7 +52,7 @@ namespace LiveSplit.Thief1
             this.Disposed = true;
 
             _state.OnStart -= State_OnStart;
-            _timer.CurrentState.OnStart -= timer_OnStart;
+            _timer.CurrentState.OnStart -= Timer_OnStart;
 
             if (_gameMemory != null)
             {
@@ -61,18 +61,11 @@ namespace LiveSplit.Thief1
 
         }
 
-        void State_OnStart(object sender, EventArgs e)
-        {
-            _timer.InitializeGameTime();
+        private void State_OnStart(object sender, EventArgs e) => _timer.InitializeGameTime();
 
-        }
+        private void Timer_OnStart(object sender, EventArgs e) => _timer.InitializeGameTime();
 
-        void timer_OnStart(object sender, EventArgs e)
-        {
-            _timer.InitializeGameTime();
-        }
-
-        void gameMemory_OnFirstLevelLoading(object sender, EventArgs e)
+        private void GameMemory_OnFirstLevelLoading(object sender, EventArgs e)
         {
             if(this.Settings.AutoRestart)
             {
@@ -80,7 +73,7 @@ namespace LiveSplit.Thief1
             }
         }
 
-        void gameMemory_OnPlayerGainedControl(object sender, EventArgs e)
+        private void GameMemory_OnPlayerGainedControl(object sender, EventArgs e)
         {
             if(this.Settings.AutoStart)
             {
@@ -88,17 +81,11 @@ namespace LiveSplit.Thief1
             }
         }
 
-        void gameMemory_OnLoadStarted(object sender, EventArgs e)
-        {
-            _state.IsGameTimePaused = true;
-        }
+        private void GameMemory_OnLoadStarted(object sender, EventArgs e) => _state.IsGameTimePaused = true;
 
-        void gameMemory_OnLoadFinished(object sender, EventArgs e)
-        {
-            _state.IsGameTimePaused = false;
-        }
+        private void GameMemory_OnLoadFinished(object sender, EventArgs e) => _state.IsGameTimePaused = false;
 
-        void gameMemory_OnSplitCompleted(object sender, int splitindex, uint frame)
+        private void GameMemory_OnSplitCompleted(object sender, int splitindex, uint frame)
         {
             Debug.WriteLineIf(splitindex != 0, String.Format("[NoLoads] Trying to split {0}, State: {1} - {2}", splitindex, _gameMemory.SplitStates[splitindex], frame));
             if(_state.CurrentPhase == TimerPhase.Running && !_gameMemory.SplitStates[splitindex])
@@ -109,20 +96,11 @@ namespace LiveSplit.Thief1
             }
         }
 
-        public override XmlNode GetSettings(XmlDocument document)
-        {
-            return this.Settings.GetSettings(document);
-        }
+        public override XmlNode GetSettings(XmlDocument document) => this.Settings.GetSettings(document);
 
-        public override Control GetSettingsControl(LayoutMode mode)
-        {
-            return this.Settings;
-        }
+        public override Control GetSettingsControl(LayoutMode mode) => this.Settings;
 
-        public override void SetSettings(XmlNode settings)
-        {
-            this.Settings.SetSettings(settings);
-        }
+        public override void SetSettings(XmlNode settings) => this.Settings.SetSettings(settings);
 
         public override void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode) { }
         //public override void RenameComparison(string oldName, string newName) { }

@@ -17,7 +17,6 @@ namespace LiveSplit.Thief1
         public delegate void SplitCompletedEventHandler(object sender, int SplitIndex, uint frame);
         public event SplitCompletedEventHandler OnSplitCompleted;
 
-
         private Task _thread;
         private CancellationTokenSource _cancelSource;
         private SynchronizationContext _uiThread;
@@ -26,48 +25,49 @@ namespace LiveSplit.Thief1
 
         private DeepPointer _isLoadingPtr = null;
         private DeepPointer _levelName = null;
+        private int StringReadLenght = 6;
 
         private SuisCodeInjection.CodeInjection injection;
 
+        public LevelRow[] Splits { get; set; }
+
         public bool[] SplitStates { get; set; }
-        public int TotalSplits { get; set; }
 
-        public void ResetSplitStates()
-        {
-            for(int i = 0; i < SplitStates.Length; i++)
-            {
-                SplitStates[i] = false;
-            }
-        }
-
-        public static class MapNames
-        {
-            public static string mission01_A_Keepers_Training = "MISS1";
-            public static string mission02_Lord_Baffords_Manor = "MISS2";
-            public static string mission03_Break_From_Cragscleft_Prison = "MISS3";
-            public static string mission04_Down_In_The_Bonehoard = "MISS4";
-            public static string mission05_Assassins = "MISS5";
-            public static string mission05Gold_ThievesGuild = "MISS15";
-            public static string mission06_TheSword = "MISS6";
-            public static string mission07_The_Haunted_Cathedral = "MISS7";
-            public static string mission07Gold_MagesTowers = "MISS16";
-            public static string mission08_TheLostCity = "MISS9";
-            public static string mission08Gold_Song_Of_The_Caverns = "MISS17";
-            public static string mission09_Undercover = "MISS10";
-            public static string mission10_Return_To_The_Cathedral = "MISS11";
-            public static string mission11_Escape = "MISS12";
-            public static string mission12_Strange_Bedfellows = "MISS13";
-            public static string mission13_Into_the_Maw_of_Chaos = "MISS14";
-            //public static string mission99_Bloopers = "MISS18";
-        }
 
         public GameMemory(Thief1Settings componentSettings)
         {
             _settings = componentSettings;
-            SplitStates = new bool[_settings.TotalSplits+1];
-            ResetSplitStates();
-
+            _settings.SplitsChanged += _settings_SplitsChanged;
+            _settings_SplitsChanged(null, null);
             _ignorePIDs = new List<int>();
+        }
+
+        private void _settings_SplitsChanged(object sender, EventArgs e)
+        {
+            Debug.WriteLine("[NO LOADS] Splits changed. Updating GameMemory reader.");
+            if(_settings.CurrentSplits != null)
+            {
+                Splits = _settings.CurrentSplits;
+                SplitStates = new bool[Splits.Length + 1];
+                StringReadLenght = FindLongest(Splits);
+                for(int i = 0; i < SplitStates.Length; i++)
+                {
+                    SplitStates[i] = false;
+                }
+            }
+        }
+
+        private int FindLongest(LevelRow[] splits)
+        {
+            int longest = 0;
+            if(splits == null)
+                return 0;
+            for(int i=0; i<splits.Length; i++)
+            {
+                if(splits[i].MapName.Length > longest)
+                    longest = splits[i].MapName.Length;
+            }
+            return longest;
         }
 
         public void StartMonitoring()
@@ -129,17 +129,7 @@ namespace LiveSplit.Thief1
                     while (!game.HasExited)
                     {
                         _isLoadingPtr.Deref(game, out isLoading);
-                        string tempMap = _levelName.DerefString(game, 6, "");
-
-                        //Since it changes to String.Empty during loads
-                        if(tempMap != "")
-                        {
-                            CurrentMap = tempMap.ToUpper();
-                            if(CurrentMap.StartsWith("MISS0"))
-                                CurrentMap = CurrentMap.Remove(4, 1); //Because of course these map names had to differ
-                            else if(CurrentMap.EndsWith("."))
-                                CurrentMap = CurrentMap.Remove(5, 1);
-                        }
+                        CurrentMap = _levelName.DerefString(game, StringReadLenght, "").ToLower();
 
 
 
@@ -178,7 +168,7 @@ namespace LiveSplit.Thief1
                                     }, null);
                                 }
 
-                                if(CurrentMap == MapNames.mission01_A_Keepers_Training || CurrentMap == MapNames.mission02_Lord_Baffords_Manor)
+                                if(Splits != null && Splits.Length > 0 && CurrentMap == Splits[0].MapName)
                                 {
                                     // StartTimer
                                     _uiThread.Post(d =>
@@ -194,6 +184,14 @@ namespace LiveSplit.Thief1
 
                         if(CurrentMap != prevMap && CurrentMap != "")
                         {
+                            for(int i=1; i<Splits.Length; i++)
+                            {
+                                if(Splits[i].Checked && Splits[i].MapName == CurrentMap && Splits[i-1].MapName == prevMap)
+                                {
+                                    Split(i, frameCounter);
+                                    break;
+                                }
+                            }
                             Debug.WriteLine("[NOLOADS] Map changed from \"" + prevMap + "\" to \"" + CurrentMap + "\"");
                         }
 
@@ -462,7 +460,11 @@ namespace LiveSplit.Thief1
 
             }
             return game;
+        }
 
+        public void Dispose()
+        {
+            _settings.SplitsChanged -= _settings_SplitsChanged;
         }
     }
 }

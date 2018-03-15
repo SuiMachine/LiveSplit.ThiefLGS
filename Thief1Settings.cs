@@ -41,43 +41,25 @@ namespace LiveSplit.Thief1
     {
         public bool AutoRestart { get; set; }
         public bool AutoStart { get; set; }
-        public int TotalSplits { get; set; }
         public LevelRow[] CurrentSplits { get; set; }
 
         private const bool DEFAULT_AUTORESET = false;
         private const bool DEFAULT_AUTOSTART = true;
-        private bool SplitsChanged = false;
 
         private LevelRow[] thief1Rows = new LevelRow[] {
-            new LevelRow(true, "miss1"),
-            new LevelRow(true, "miss2"),
-            new LevelRow(true, "miss3"),
-            new LevelRow(true, "miss4"),
-            new LevelRow(true, "miss5"),
-            new LevelRow(true, "miss6"),
-            new LevelRow(true, "miss7"),
-            new LevelRow(true, "miss8"),
-            new LevelRow(true, "miss9"),
-            new LevelRow(true, "miss10"),
-            new LevelRow(true, "miss11"),
-            new LevelRow(true, "miss12"),
-            new LevelRow(true, "miss13")
-        };
-
-        private LevelRow[] thief1RowsNoLeadingZero = new LevelRow[] {
-            new LevelRow(true, "miss1"),
-            new LevelRow(true, "miss2"),
-            new LevelRow(true, "miss3"),
-            new LevelRow(true, "miss4"),
-            new LevelRow(true, "miss5"),
-            new LevelRow(true, "miss6"),
-            new LevelRow(true, "miss7"),
-            new LevelRow(true, "miss8"),
-            new LevelRow(true, "miss9"),
-            new LevelRow(true, "miss10"),
-            new LevelRow(true, "miss11"),
-            new LevelRow(true, "miss12"),
-            new LevelRow(true, "miss13")
+            new LevelRow(true, "miss1.mis"),
+            new LevelRow(true, "miss2.mis"),
+            new LevelRow(true, "miss3.mis"),
+            new LevelRow(true, "miss4.mis"),
+            new LevelRow(true, "miss5.mis"),
+            new LevelRow(true, "miss6.mis"),
+            new LevelRow(true, "miss7.mis"),
+            new LevelRow(true, "miss8.mis"),
+            new LevelRow(true, "miss9.mis"),
+            new LevelRow(true, "miss10.mis"),
+            new LevelRow(true, "miss11.mis"),
+            new LevelRow(true, "miss12.mis"),
+            new LevelRow(true, "miss13.mis")
         };
 
         public Thief1Settings()
@@ -90,6 +72,28 @@ namespace LiveSplit.Thief1
 
             this.CB_Autostart.DataBindings.Add("Checked", this, "AutoStart", false, DataSourceUpdateMode.OnPropertyChanged);
             this.CB_Autorestart.DataBindings.Add("Checked", this, "AutoRestart", false, DataSourceUpdateMode.OnPropertyChanged);
+            UpdateSplitsArray();
+        }
+
+        private void Thief1Settings_HandleDestroyed(object sender, System.EventArgs e)
+        {
+            if(splitsChanged)
+            {
+                splitsChanged = false;
+                OnSplitsChanged(EventArgs.Empty);
+            }
+        }
+
+        private bool splitsChanged = true;
+
+        public event EventHandler SplitsChanged;
+        protected virtual void OnSplitsChanged(EventArgs e)
+        {
+            if(SplitsChanged != null)
+            {
+                UpdateSplitsArray();
+                SplitsChanged(this, e);
+            }
         }
 
 
@@ -101,24 +105,22 @@ namespace LiveSplit.Thief1
 
             settingsNode.AppendChild(ToElement(doc, "AutoReset", this.AutoRestart));
             settingsNode.AppendChild(ToElement(doc, "AutoStart", this.AutoStart));
-            settingsNode.AppendChild(ToElement(doc, "TotalSplits", this.TotalSplits));
             settingsNode.AppendChild(ToNodeArray(doc, "SplitsNode", this.CurrentSplits));
-            if(SplitsChanged)
-                UpdateSplitsArray();
 
             return settingsNode;
         }
 
         private void UpdateSplitsArray()
         {
+            Debug.WriteLine("[NO LOADS] Updating Splits array");
             CurrentSplits = new LevelRow[ChkList_Splits.Items.Count];
 
             for(int i=0; i<ChkList_Splits.Items.Count; i++)
             {
-                string item = ChkList_Splits.Items[i].ToString();
+                string item = ChkList_Splits.Items[i].ToString().ToLower();
                 CurrentSplits[i] = new LevelRow(ChkList_Splits.CheckedIndices.Contains(i), item);
             }
-            SplitsChanged = false;
+            splitsChanged = false;
         }
 
 
@@ -127,9 +129,10 @@ namespace LiveSplit.Thief1
         {
             this.AutoRestart = ParseBool(settings, "AutoReset", DEFAULT_AUTORESET);
             this.AutoStart = ParseBool(settings, "AutoStart", DEFAULT_AUTOSTART);
-            this.TotalSplits = ParseInt(settings, "TotalSplits");
             this.CurrentSplits = ParseSplits(settings, "SplitsNode");
             this.ChkList_Splits.Fill(CurrentSplits);
+            splitsChanged = false;
+            OnSplitsChanged(EventArgs.Empty);
         }
 
 
@@ -238,7 +241,7 @@ namespace LiveSplit.Thief1
                 ChkList_Splits.Items.Add(tempMap.ToLower(), true);
                 ComboBox_SplitPresets.SelectedIndex = (int)Presets.Custom;
             }
-            SplitsChanged = true;
+            splitsChanged = true;
         }
 
         private void B_SplitEdit_Click(object sender, EventArgs e)
@@ -262,7 +265,7 @@ namespace LiveSplit.Thief1
                     }
                 }
             }
-            SplitsChanged = true;
+            splitsChanged = true;
         }
 
         private void B_SplitRemove_Click(object sender, EventArgs e)
@@ -281,7 +284,7 @@ namespace LiveSplit.Thief1
                     ChkList_Splits.Items.RemoveAt(selectedElement);
                 }
             }
-            SplitsChanged = true;
+            splitsChanged = true;
         }
 
         private void B_SplitMoveUp_Click(object sender, EventArgs e)
@@ -305,7 +308,7 @@ namespace LiveSplit.Thief1
                     ChkList_Splits.SelectedIndex = selectedElementIndex - 1;
                 }
             }
-            SplitsChanged = true;
+            splitsChanged = true;
         }
 
         private void B_SplitMoveDown_Click(object sender, EventArgs e)
@@ -329,14 +332,14 @@ namespace LiveSplit.Thief1
                     ChkList_Splits.SelectedIndex = selectedElementIndex + 1;
                 }
             }
-            SplitsChanged = true;
+            splitsChanged = true;
         }
         #endregion
 
         #region ChkListAdditionalEvents
         private void ChkList_Splits_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            SplitsChanged = true;
+            splitsChanged = true;
         }
         #endregion
     }
@@ -349,7 +352,7 @@ namespace LiveSplit.Thief1
             lBox.Items.Clear();
             foreach(var element in elements)
             {
-                lBox.Items.Add(element.MapName, element.Checked);
+                lBox.Items.Add(element.MapName.ToLower(), element.Checked);
             }
         }
     }

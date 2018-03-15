@@ -263,6 +263,7 @@
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
+            this.HandleDestroyed += Thief1Settings_HandleDestroyed;
 
         }
 
