@@ -168,7 +168,7 @@ namespace SuisCodeInjection
             if(Absolute)
                 return IntPtr.Add(alocAdress, offset.ToInt32());
             else
-                return IntPtr.Add(alocAdress, offset.ToInt32()) - process.MainModuleWow64Safe().BaseAddress.ToInt32();
+                return IntPtr.Add(alocAdress, offset.ToInt32()) - process.MainModule.BaseAddress.ToInt32();
         }
 
         #region StaticStuffToHelp

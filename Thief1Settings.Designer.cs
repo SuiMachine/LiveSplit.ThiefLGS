@@ -44,18 +44,20 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.ComboBox_SplitPresets = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.CB_SplitOnMissionSuccess = new System.Windows.Forms.CheckBox();
             this.gbStartSplits.SuspendLayout();
             this.tlpMain.SuspendLayout();
             this.gbSplits.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
+            this.tableLayoutPanel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbStartSplits
             // 
-            this.gbStartSplits.Controls.Add(this.CB_Autorestart);
-            this.gbStartSplits.Controls.Add(this.CB_Autostart);
+            this.gbStartSplits.Controls.Add(this.tableLayoutPanel4);
             this.gbStartSplits.Dock = System.Windows.Forms.DockStyle.Top;
             this.gbStartSplits.Location = new System.Drawing.Point(3, 3);
             this.gbStartSplits.Name = "gbStartSplits";
@@ -67,7 +69,7 @@
             // CB_Autorestart
             // 
             this.CB_Autorestart.AutoSize = true;
-            this.CB_Autorestart.Location = new System.Drawing.Point(236, 19);
+            this.CB_Autorestart.Location = new System.Drawing.Point(125, 3);
             this.CB_Autorestart.Name = "CB_Autorestart";
             this.CB_Autorestart.Size = new System.Drawing.Size(77, 17);
             this.CB_Autorestart.TabIndex = 1;
@@ -77,7 +79,7 @@
             // CB_Autostart
             // 
             this.CB_Autostart.AutoSize = true;
-            this.CB_Autostart.Location = new System.Drawing.Point(6, 19);
+            this.CB_Autostart.Location = new System.Drawing.Point(3, 3);
             this.CB_Autostart.Name = "CB_Autostart";
             this.CB_Autostart.Size = new System.Drawing.Size(68, 17);
             this.CB_Autostart.TabIndex = 0;
@@ -247,6 +249,33 @@
             this.label1.TabIndex = 4;
             this.label1.Text = "Preset:";
             // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.ColumnCount = 3;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 122F));
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 163F));
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.Controls.Add(this.CB_SplitOnMissionSuccess, 2, 0);
+            this.tableLayoutPanel4.Controls.Add(this.CB_Autorestart, 1, 0);
+            this.tableLayoutPanel4.Controls.Add(this.CB_Autostart, 0, 0);
+            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 16);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 1;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(464, 25);
+            this.tableLayoutPanel4.TabIndex = 0;
+            // 
+            // CB_SplitOnMissionSuccess
+            // 
+            this.CB_SplitOnMissionSuccess.AutoSize = true;
+            this.CB_SplitOnMissionSuccess.Location = new System.Drawing.Point(288, 3);
+            this.CB_SplitOnMissionSuccess.Name = "CB_SplitOnMissionSuccess";
+            this.CB_SplitOnMissionSuccess.Size = new System.Drawing.Size(164, 17);
+            this.CB_SplitOnMissionSuccess.TabIndex = 2;
+            this.CB_SplitOnMissionSuccess.Text = "Split on last map\'s completion";
+            this.CB_SplitOnMissionSuccess.UseVisualStyleBackColor = true;
+            // 
             // Thief1Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -254,16 +283,17 @@
             this.Controls.Add(this.tlpMain);
             this.Name = "Thief1Settings";
             this.Size = new System.Drawing.Size(476, 648);
+            this.HandleDestroyed += this.Thief1Settings_HandleDestroyed;
             this.gbStartSplits.ResumeLayout(false);
-            this.gbStartSplits.PerformLayout();
             this.tlpMain.ResumeLayout(false);
             this.gbSplits.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
+            this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel4.PerformLayout();
             this.ResumeLayout(false);
-            this.HandleDestroyed += Thief1Settings_HandleDestroyed;
 
         }
 
@@ -284,5 +314,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.ComboBox ComboBox_SplitPresets;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private System.Windows.Forms.CheckBox CB_SplitOnMissionSuccess;
     }
 }

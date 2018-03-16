@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using LiveSplit.ComponentUtil;
+using ReworkedTrainer32bit;
 
 namespace LiveSplit.Thief1
 {
@@ -23,15 +24,15 @@ namespace LiveSplit.Thief1
         private List<int> _ignorePIDs;
         private Thief1Settings _settings;
 
-        private DeepPointer _isLoadingPtr = null;
-        private DeepPointer _levelCompleteCounter = null;
-        private DeepPointer _levelName = null;
-        private int StringReadLenght = 6;
+        private SuisReader _isLoadingPtr = null;
+        private SuisReader _levelCompleteCounter = null;
+        private SuisReader _levelName = null;
+        private int StringReadLenght = 1;
 
         private SuisCodeInjection.CodeInjection injection;
 
+        public bool SplitOnLastSplit { get; set; }
         public LevelRow[] Splits { get; set; }
-
         public bool[] SplitStates { get; set; }
 
 
@@ -39,13 +40,12 @@ namespace LiveSplit.Thief1
         {
             _settings = componentSettings;
             _settings.SplitsChanged += _settings_SplitsChanged;
-            _settings_SplitsChanged(null, null);
             _ignorePIDs = new List<int>();
         }
 
         private void _settings_SplitsChanged(object sender, EventArgs e)
         {
-            Debug.WriteLine("[NO LOADS] Splits changed. Updating GameMemory reader.");
+            Debug.WriteLine(string.Format("[NO LOADS] Splits changed. Updating GameMemory reader (a total of {0} splits and longest name of {1} characters).", Splits != null ? Splits.Length : 0, StringReadLenght));
             if(_settings.CurrentSplits != null)
             {
                 Splits = _settings.CurrentSplits;
@@ -55,14 +55,15 @@ namespace LiveSplit.Thief1
                 {
                     SplitStates[i] = false;
                 }
+                SplitOnLastSplit = _settings.SplitOnMissionSuccess;
             }
         }
 
         private int FindLongest(LevelRow[] splits)
         {
-            int longest = 0;
+            int longest = 1;
             if(splits == null)
-                return 0;
+                return 1;
             for(int i=0; i<splits.Length; i++)
             {
                 if(splits[i].MapName.Length > longest)
@@ -110,6 +111,7 @@ namespace LiveSplit.Thief1
         void MemoryReadThread()
         {
             Debug.WriteLine("[NoLoads] MemoryReadThread");
+            _settings_SplitsChanged(null, null);
 
             while (!_cancelSource.IsCancellationRequested)
             {
@@ -132,9 +134,12 @@ namespace LiveSplit.Thief1
 
                     while (!game.HasExited)
                     {
-                        _isLoadingPtr.Deref(game, out isLoading);
-                        _levelCompleteCounter.Deref(game, out LevelCompletedCounter);
-                        CurrentMap = _levelName.DerefString(game, StringReadLenght, "").ToLower();
+                        isLoading = _isLoadingPtr.ReadBool();
+                        if(_levelCompleteCounter != null)
+                            LevelCompletedCounter = _levelCompleteCounter.ReadInteger();
+                        string tempRead = _levelName.ReadString(StringReadLenght);
+                        if(tempRead != "")
+                            CurrentMap = tempRead.ToLower();
 
                         if(isLoading != prevIsLoading)
                         {
@@ -196,6 +201,14 @@ namespace LiveSplit.Thief1
                                 }
                             }
                             Debug.WriteLine("[NOLOADS] Map changed from \"" + prevMap + "\" to \"" + CurrentMap + "\"");
+
+                            if(SplitOnLastSplit)
+                            {
+                                if(Splits.Last().MapName == CurrentMap && LevelCompletedCounter > prevLevelCompletedCounter)
+                                {
+                                    Split(SplitStates.Length - 1, frameCounter);
+                                }
+                            }
                         }
 
                         prevMap = CurrentMap;
@@ -242,12 +255,9 @@ namespace LiveSplit.Thief1
             }, null);
         }
 
-
-
         Process GetGameProcess()
         {
-            Process game = Process.GetProcesses().FirstOrDefault(p => (p.ProcessName.ToLower() == "thief") && !p.HasExited && !_ignorePIDs.Contains(p.Id));
-
+            Process game = Process.GetProcesses().FirstOrDefault(p => (p.ProcessName.ToLower() == "thief" || p.ProcessName.ToLower() == "thief2") && !p.HasExited && !_ignorePIDs.Contains(p.Id));
 
             if (game == null)
             {
@@ -267,15 +277,15 @@ namespace LiveSplit.Thief1
                     SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
                     container.AddVariable("IsLoading", 0);
                     container.AddVariable("Counter", 0);
-                    container.AddInjectionPoint("LoadStart", game.MainModuleWow64Safe().BaseAddress + 0x177A0, 6);
+                    container.AddInjectionPoint("LoadStart", game.MainModule.BaseAddress + 0x177A0, 6);
                     container.AddWriteToVariable("IsLoading", 1);
                     container.AddByteCode(new byte[] { 0x81, 0xEC, 0x84, 0x0A, 0x00, 0x00 });
                     container.CloseInjection("LoadStart");
-                    container.AddInjectionPoint("LoadEnd", game.MainModuleWow64Safe().BaseAddress + 0x18302, 7);
+                    container.AddInjectionPoint("LoadEnd", game.MainModule.BaseAddress + 0x18302, 7);
                     container.AddWriteToVariable("IsLoading", 0);
                     container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x8C, 0x0A, 0x00, 0x00 });
                     container.CloseInjection("LoadEnd");
-                    container.AddInjectionPoint("PlayEndCinematic", game.MainModuleWow64Safe().BaseAddress + 0x4D5B7, 6);
+                    container.AddInjectionPoint("PlayEndCinematic", game.MainModule.BaseAddress + 0x4D5B7, 6);
                     container.AddIncrementValue("Counter", 1);
                     container.AddByteCode(new byte[] { 0x64, 0xA1, 0x00, 0x00, 0x00, 0x00 });
                     container.CloseInjection("PlayEndCinematic");
@@ -289,12 +299,74 @@ namespace LiveSplit.Thief1
                     }
                     else
                     {
-                        _levelName = new DeepPointer(0x408900);
+                        _levelName = new ReworkedTrainer32bit.SuisReader(game, (int)game.MainModule.BaseAddress + 0x408900);
+                    }
+                }
+                else if(ProductVersion == "1.22")
+                {
+                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.22");
+                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
+                    container.AddVariable("IsLoading", 0);
+                    container.AddVariable("Counter", 0);
+                    container.AddInjectionPoint("LoadStart", game.MainModule.BaseAddress + 0x17306, 6);
+                    container.AddWriteToVariable("IsLoading", 1);
+                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x84, 0x09, 0x00, 0x00 });
+                    container.CloseInjection("LoadStart");
+                    container.AddInjectionPoint("LoadEnd", game.MainModule.BaseAddress + 0x17EF6, 7);
+                    container.AddWriteToVariable("IsLoading", 0);
+                    container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x8C, 0x09, 0x00, 0x00 });
+                    container.CloseInjection("LoadEnd");
+                    container.AddInjectionPoint("PlayEndCinematic", game.MainModule.BaseAddress + 0x4D507, 6);
+                    container.AddIncrementValue("Counter", 1);
+                    container.AddByteCode(new byte[] { 0x64, 0xA1, 0x00, 0x00, 0x00, 0x00 });
+                    container.CloseInjection("PlayEndCinematic");
+                    injection = new SuisCodeInjection.CodeInjection(game, container);
+
+                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
+                    {
+                        MessageBox.Show("Failed to inject the code: " + injection.Result);
+                        _ignorePIDs.Add(game.Id);
+                        return null;
+                    }
+                    else
+                    {
+                        _levelName = new SuisReader(game, (int)game.MainModule.BaseAddress + 0x4030A0);
+                    }
+                }
+                else if(ProductVersion == "1.21")
+                {
+                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.21");
+                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
+                    container.AddVariable("IsLoading", 0);
+                    container.AddVariable("Counter", 0);
+                    container.AddInjectionPoint("LoadStart", game.MainModule.BaseAddress + 0x168B0, 6);
+                    container.AddWriteToVariable("IsLoading", 1);
+                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x30, 0x04, 0x00, 0x00 });
+                    container.CloseInjection("LoadStart");
+                    container.AddInjectionPoint("LoadEnd", game.MainModule.BaseAddress + 0x16BD5, 7);
+                    container.AddWriteToVariable("IsLoading", 0);
+                    container.AddByteCode(new byte[] { 0x8B, 0x8C, 0x24, 0x3C, 0x04, 0x00, 0x00 });
+                    container.CloseInjection("LoadEnd");
+                    container.AddInjectionPoint("PlayEndCinematic", game.MainModule.BaseAddress + 0x49837, 6);
+                    container.AddIncrementValue("Counter", 1);
+                    container.AddByteCode(new byte[] { 0x64, 0xA1, 0x00, 0x00, 0x00, 0x00 });
+                    container.CloseInjection("PlayEndCinematic");
+                    injection = new SuisCodeInjection.CodeInjection(game, container);
+
+                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
+                    {
+                        MessageBox.Show("Failed to inject the code: " + injection.Result);
+                        _ignorePIDs.Add(game.Id);
+                        return null;
+                    }
+                    else
+                    {
+                        _levelName = new ReworkedTrainer32bit.SuisReader(game, (int)game.MainModule.BaseAddress + 0x3BFF08);
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Unrecognized version of EXE. Supported versions are NewDark 1.22 (TFix 1.20), 1.25 (TFix 1.25d) and 1.37 (OldDark).");
+                    MessageBox.Show("Unrecognized version of EXE. Supported versions are NewDark 1.25, 1.22 and 1.21.");
                     _ignorePIDs.Add(game.Id);
                     return null;
                 }
@@ -307,12 +379,13 @@ namespace LiveSplit.Thief1
                 IntPtr addressCounter = injection.GetVariableAdress("Counter");
                 if(address != (IntPtr)0)
                 {
-                    Debug.WriteLine("[NoLoads] Injected and reading from variable at: 0x" + address.ToString("X4"));
-                    _isLoadingPtr = new DeepPointer(address.ToInt32());
+                    Debug.WriteLine("[NoLoads] Injected and reading from variable at: 0x" + address.ToInt32().ToString("X4"));
+                    _isLoadingPtr = new SuisReader(game, (int)game.MainModule.BaseAddress + address.ToInt32());
                 }
                 if(addressCounter != (IntPtr)0)
                 {
-                    _levelCompleteCounter = new DeepPointer(addressCounter.ToInt32());
+                    Debug.WriteLine("[NoLoads] Injected and reading from variable at: 0x" + addressCounter.ToInt32().ToString("X4"));
+                    _levelCompleteCounter = new SuisReader(game, game.MainModule.BaseAddress.ToInt32() + addressCounter.ToInt32());
                 }
 
             }

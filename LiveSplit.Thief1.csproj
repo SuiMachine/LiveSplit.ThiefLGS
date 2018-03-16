@@ -66,6 +66,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SuisReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Thief1Settings.resx">
