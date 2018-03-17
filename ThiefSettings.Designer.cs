@@ -1,6 +1,6 @@
-﻿namespace LiveSplit.Thief1
+﻿namespace LiveSplit.ThiefLGS
 {
-    partial class Thief1Settings
+    partial class ThiefSettings
     {
         /// <summary>
         /// Required designer variable.
@@ -281,9 +281,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tlpMain);
-            this.Name = "Thief1Settings";
+            this.Name = "ThiefSettings";
             this.Size = new System.Drawing.Size(476, 648);
-            this.HandleDestroyed += this.Thief1Settings_HandleDestroyed;
+            this.HandleDestroyed += this.ThiefSettings_HandleDestroyed;
             this.gbStartSplits.ResumeLayout(false);
             this.tlpMain.ResumeLayout(false);
             this.gbSplits.ResumeLayout(false);

@@ -5,10 +5,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using LiveSplit.ComponentUtil;
 using ReworkedTrainer32bit;
 
-namespace LiveSplit.Thief1
+namespace LiveSplit.ThiefLGS
 {
     class GameMemory
     {
@@ -22,7 +21,7 @@ namespace LiveSplit.Thief1
         private CancellationTokenSource _cancelSource;
         private SynchronizationContext _uiThread;
         private List<int> _ignorePIDs;
-        private Thief1Settings _settings;
+        private ThiefSettings _settings;
 
         private SuisReader _isLoadingPtr = null;
         private SuisReader _levelCompleteCounter = null;
@@ -36,7 +35,7 @@ namespace LiveSplit.Thief1
         public bool[] SplitStates { get; set; }
 
 
-        public GameMemory(Thief1Settings componentSettings)
+        public GameMemory(ThiefSettings componentSettings)
         {
             _settings = componentSettings;
             _settings.SplitsChanged += _settings_SplitsChanged;
@@ -117,7 +116,7 @@ namespace LiveSplit.Thief1
             {
                 try
                 {
-                    Debug.WriteLine("[NoLoads] Waiting for thief.exe...");
+                    Debug.WriteLine("[NoLoads] Waiting for thief.exe or thief2.exe...");
 
                     Process game;
                     while ((game = GetGameProcess()) == null)
@@ -137,7 +136,7 @@ namespace LiveSplit.Thief1
                         isLoading = _isLoadingPtr.ReadBool();
                         if(_levelCompleteCounter != null)
                             LevelCompletedCounter = _levelCompleteCounter.ReadInteger();
-                        string tempRead = _levelName.ReadString(StringReadLenght);
+                        string tempRead = _levelName.ReadString(StringReadLenght, SuisReader.StringType.UTF8).ToString();
                         if(tempRead != "")
                             CurrentMap = tempRead.ToLower();
 
@@ -330,7 +329,7 @@ namespace LiveSplit.Thief1
                     }
                     else
                     {
-                        _levelName = new SuisReader(game, (int)game.MainModule.BaseAddress + 0x4030A0);
+                        _levelName = new SuisReader(game, game.MainModule.BaseAddress.ToInt32() + 0x4030A0);
                     }
                 }
                 else if(ProductVersion == "1.21")
@@ -361,12 +360,65 @@ namespace LiveSplit.Thief1
                     }
                     else
                     {
-                        _levelName = new ReworkedTrainer32bit.SuisReader(game, (int)game.MainModule.BaseAddress + 0x3BFF08);
+                        _levelName = new SuisReader(game, game.MainModule.BaseAddress.ToInt32() + 0x3BFF08);
+                    }
+                }
+                //Old DarkEngine
+                else if(ProductVersion == "1.37")
+                {
+                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.37 (Old Dark)");
+                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
+                    container.AddVariable("IsLoading", 0);
+                    container.AddInjectionPoint("LoadStart", game.MainModule.BaseAddress + 0x8A70, 6);
+                    container.AddWriteToVariable("IsLoading", 1);
+                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x28, 0x04, 0x00, 0x00 });
+                    container.CloseInjection("LoadStart");
+                    container.AddInjectionPoint("LoadEnd", game.MainModule.BaseAddress + 0x8D08, 6);
+                    container.AddWriteToVariable("IsLoading", 0);
+                    container.AddByteCode(new byte[] { 0x81, 0xC4, 0x28, 0x04, 0x00, 0x00 });
+                    container.CloseInjection("LoadEnd");
+                    injection = new SuisCodeInjection.CodeInjection(game, container);
+
+                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
+                    {
+                        MessageBox.Show("Failed to inject the code: " + injection.Result);
+                        _ignorePIDs.Add(game.Id);
+                        return null;
+                    }
+                    else
+                    {
+                        _levelName = new SuisReader(game, game.MainModule.BaseAddress.ToInt32() + 0x2790CC);
+                    }
+                }
+                else if(ProductVersion == "1.18")
+                {
+                    Debug.WriteLine("[NOLOADS] Detected EXE version 1.18 (Old Dark)");
+                    SuisCodeInjection.CodeInjectionMasterContainer container = new SuisCodeInjection.CodeInjectionMasterContainer();
+                    container.AddVariable("IsLoading", 0);
+                    container.AddInjectionPoint("LoadStart", game.MainModule.BaseAddress + 0xACA0, 6);
+                    container.AddWriteToVariable("IsLoading", 1);
+                    container.AddByteCode(new byte[] { 0x81, 0xEC, 0x24, 0x04, 0x00, 0x00 });
+                    container.CloseInjection("LoadStart");
+                    container.AddInjectionPoint("LoadEnd", game.MainModule.BaseAddress + 0xAF06, 5);
+                    container.AddWriteToVariable("IsLoading", 0);
+                    container.AddByteCode(new byte[] { 0x8B, 0x44, 0x24, 0x28, 0x5F });
+                    container.CloseInjection("LoadEnd");
+                    injection = new SuisCodeInjection.CodeInjection(game, container);
+
+                    if(injection.Result != SuisCodeInjection.CodeInjectionResult.Success)
+                    {
+                        MessageBox.Show("Failed to inject the code: " + injection.Result);
+                        _ignorePIDs.Add(game.Id);
+                        return null;
+                    }
+                    else
+                    {
+                        _levelName = new SuisReader(game, game.MainModule.BaseAddress.ToInt32() + 0x3BEB00);
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Unrecognized version of EXE. Supported versions are NewDark 1.25, 1.22 and 1.21.");
+                    MessageBox.Show("Unrecognized version of EXE. Supported versions are NewDark 1.25, 1.22, 1.21 and OldDark 1.37 and 1.18.");
                     _ignorePIDs.Add(game.Id);
                     return null;
                 }

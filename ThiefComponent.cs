@@ -9,16 +9,16 @@ using System.Xml;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace LiveSplit.Thief1
+namespace LiveSplit.ThiefLGS
 {
-    class Thief1Component : LogicComponent
+    class ThiefComponent : LogicComponent
     {
         public override string ComponentName
         {
-            get { return "Thief1"; }
+            get { return "ThiefLGS"; }
         }
 
-        public Thief1Settings Settings { get; set; }
+        public ThiefSettings Settings { get; set; }
 
         public bool Disposed { get; private set; }
         public bool IsLayoutComponent { get; private set; }
@@ -27,12 +27,12 @@ namespace LiveSplit.Thief1
         private GameMemory _gameMemory;
         private LiveSplitState _state;
 
-        public Thief1Component(LiveSplitState state, bool isLayoutComponent)
+        public ThiefComponent(LiveSplitState state, bool isLayoutComponent)
         {
             _state = state;
             this.IsLayoutComponent = isLayoutComponent;
 
-            this.Settings = new Thief1Settings();
+            this.Settings = new ThiefSettings();
 
             _timer = new TimerModel { CurrentState = state };
             _timer.CurrentState.OnStart += Timer_OnStart;

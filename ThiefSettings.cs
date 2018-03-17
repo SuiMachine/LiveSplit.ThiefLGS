@@ -1,18 +1,15 @@
-﻿using LiveSplit.ComponentUtil;
-using LiveSplit.UI;
-using System;
-using System.IO;
+﻿using System;
 using System.Xml;
 using System.ComponentModel;
-using System.Drawing;
-using System.Globalization;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using System.Diagnostics;
+using LiveSplit.UI;
 
-namespace LiveSplit.Thief1
+
+namespace LiveSplit.ThiefLGS
 {
     public struct LevelRow
     {
@@ -30,14 +27,12 @@ namespace LiveSplit.Thief1
     {
         [Description("Thief: Gold")]
         ThiefGold,
-        [Description("Thief: Gold (no leading zeroes)")]
-        ThiefGoldNoZeroes,
         [Description("Thief 2: The Metal Age")]
         Thief2,
         [Description("Custom")]Custom,
     }
 
-    public partial class Thief1Settings : UserControl
+    public partial class ThiefSettings : UserControl
     {
         public bool AutoRestart { get; set; }
         public bool AutoStart { get; set; }
@@ -83,7 +78,7 @@ namespace LiveSplit.Thief1
             new LevelRow(true, "miss13.mis")
         };
 
-        public Thief1Settings()
+        public ThiefSettings()
         {
             InitializeComponent();
             AddComboBoxSources();
@@ -97,7 +92,7 @@ namespace LiveSplit.Thief1
             OnSplitsChanged(EventArgs.Empty);
         }
 
-        private void Thief1Settings_HandleDestroyed(object sender, System.EventArgs e)
+        private void ThiefSettings_HandleDestroyed(object sender, System.EventArgs e)
         {
             if(splitsChanged)
             {
