@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using LiveSplit.ComponentUtil;
@@ -45,7 +42,6 @@ namespace SuisCodeInjection
         static extern bool ReadProcessMemory(Int32 hProcess, Int32 lpBaseAddress, byte[] buffer, uint size, ref int lpNumberOfBytesToRead);
         #endregion
 
-        static readonly Int32 INTPTR_ZERO = (Int32)0;
         /// <summary>
         /// Result of code injection
         /// </summary>
@@ -55,6 +51,11 @@ namespace SuisCodeInjection
 
         private CodeInjectionMasterContainer Container;
 
+        /// <summary>
+        /// Performs a Code Injection.
+        /// </summary>
+        /// <param name="process">Process you want to inject the code to.</param>
+        /// <param name="Container">CodeInjectionMasterContainer to inject. Create the object before the injection!</param>
         public CodeInjection(Process process, CodeInjectionMasterContainer Container)
         {
             this.process = process;
@@ -65,6 +66,9 @@ namespace SuisCodeInjection
             Result = Inject();
         }
 
+        /// <summary>
+        /// Checks if all injections have been closed.
+        /// </summary>
         private void Validate()
         {
             foreach(var element in Container.Detours)
@@ -146,6 +150,12 @@ namespace SuisCodeInjection
             return CodeInjectionResult.Success;
         }
 
+        /// <summary>
+        /// Calculates and returns the Variable adress.
+        /// </summary>
+        /// <param name="Name">The name of the variable to return.</param>
+        /// <param name="Absolute">Specifies whatever the function should return relative adress or absolute one.</param>
+        /// <returns>Adress of the variable in process' memory</returns>
         public IntPtr GetVariableAdress(string Name, bool Absolute = false)
         {
             if(!Container.Variables.Keys.Contains(Name))
@@ -155,7 +165,7 @@ namespace SuisCodeInjection
             if(Absolute)
                 return IntPtr.Add(alocAdress, offset.ToInt32());
             else
-                return IntPtr.Add(alocAdress, offset.ToInt32()) - process.MainModuleWow64Safe().BaseAddress.ToInt32();
+                return IntPtr.Add(alocAdress, offset.ToInt32()) - process.MainModule.BaseAddress.ToInt32();
         }
 
         #region StaticStuffToHelp

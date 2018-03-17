@@ -1,7 +1,7 @@
-﻿LiveSplit.Thief1
+﻿LiveSplit.ThiefLGS
 =====================
 
-LiveSplit.Thief1 is a [LiveSplit](http://livesplit.org/) component for Thief: Gold.
+LiveSplit.ThiefLGS is a [LiveSplit](http://livesplit.org/) component for Thief games running on DarkEngine (or NewDark).
 
 Features
 --------
@@ -11,8 +11,8 @@ Requirements
 ------------
 
   * Thief: Gold (or The Dark Project) in versions
+  	* NewDark 1.21
 	* NewDark 1.22 (TFix 1.20)
-	* NewDark 1.23
 	* NewDark 1.25 (TFix 1.25d)
 	* OldDark 1.18
 	* OldDark 1.37

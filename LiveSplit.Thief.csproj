@@ -7,8 +7,8 @@
     <ProjectGuid>{0E8E7FAD-B686-4A3C-B2C3-89464CFF3CD1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LiveSplit.Thief1</RootNamespace>
-    <AssemblyName>LiveSplit.Thief1</AssemblyName>
+    <RootNamespace>LiveSplit.ThiefLGS</RootNamespace>
+    <AssemblyName>LiveSplit.ThiefLGS</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -51,13 +51,13 @@
   <ItemGroup>
     <Compile Include="SuisCodeInjectionContainer.cs" />
     <Compile Include="SuisCodeInjection.cs" />
-    <Compile Include="Thief1Component.cs" />
-    <Compile Include="Thief1Factory.cs" />
-    <Compile Include="Thief1Settings.cs">
+    <Compile Include="ThiefComponent.cs" />
+    <Compile Include="ThiefFactory.cs" />
+    <Compile Include="ThiefSettings.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Thief1Settings.Designer.cs">
-      <DependentUpon>Thief1Settings.cs</DependentUpon>
+    <Compile Include="ThiefSettings.Designer.cs">
+      <DependentUpon>ThiefSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="GameMemory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -66,10 +66,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SuisReader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Thief1Settings.resx">
-      <DependentUpon>Thief1Settings.cs</DependentUpon>
+    <EmbeddedResource Include="ThiefSettings.resx">
+      <DependentUpon>ThiefSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

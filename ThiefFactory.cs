@@ -7,15 +7,15 @@ using LiveSplit.UI.Components;
 using System;
 using LiveSplit.Model;
 
-namespace LiveSplit.Thief1
+namespace LiveSplit.ThiefLGS
 {
-    public class Thief1Factory : IComponentFactory
+    public class ThiefFactory : IComponentFactory
     {
-        private Thief1Component _instance;
+        private ThiefComponent _instance;
 
         public string ComponentName
         {
-            get { return "Thief1"; }
+            get { return "Thief"; }
         }
 
         public string Description
@@ -55,7 +55,7 @@ namespace LiveSplit.Thief1
                 throw new Exception("Component already loaded.");
             }
 
-            return (_instance = new Thief1Component(state, createAsLayoutComponent));
+            return (_instance = new ThiefComponent(state, createAsLayoutComponent));
         }
 
         public string UpdateName
@@ -65,7 +65,7 @@ namespace LiveSplit.Thief1
 
         public string UpdateURL
         {
-            get { return "https://raw.githubusercontent.com/SuiMachine/LiveSplit.Thief1/master/"; }
+            get { return "https://raw.githubusercontent.com/SuiMachine/LiveSplit.Thief/master/"; }
         }
 
         public Version Version
@@ -75,7 +75,7 @@ namespace LiveSplit.Thief1
 
         public string XMLURL
         {
-            get { return this.UpdateURL + "Components/update.LiveSplit.Thief1.xml"; }
+            get { return this.UpdateURL + "Components/update.LiveSplit.Thief.xml"; }
         }
     }
 
