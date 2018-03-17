@@ -3,14 +3,14 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-using LiveSplit.Thief1;
+using LiveSplit.ThiefLGS;
 using LiveSplit.UI.Components;
 
-[assembly: AssemblyTitle("LiveSplit.Thief1")]
+[assembly: AssemblyTitle("LiveSplit.Thief")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("LiveSplit.Thief1")]
+[assembly: AssemblyProduct("LiveSplit.Thief")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -33,7 +33,7 @@ using LiveSplit.UI.Components;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.3.0")]
-[assembly: AssemblyFileVersion("1.3.0")]
+[assembly: AssemblyVersion("0.9.0")]
+[assembly: AssemblyFileVersion("0.9.0")]
 
-[assembly: ComponentFactory(typeof(Thief1Factory))]
+[assembly: ComponentFactory(typeof(ThiefFactory))]
