@@ -75,7 +75,7 @@ namespace LiveSplit.ThiefLGS
 
         public string XMLURL
         {
-            get { return this.UpdateURL + "Components/update.LiveSplit.Thief.xml"; }
+            get { return this.UpdateURL + "Components/update.LiveSplit.ThiefLGS.xml"; }
         }
     }
 

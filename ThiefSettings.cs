@@ -89,6 +89,11 @@ namespace LiveSplit.ThiefLGS
             this.CB_Autostart.DataBindings.Add("Checked", this, "AutoStart", false, DataSourceUpdateMode.OnPropertyChanged);
             this.CB_Autorestart.DataBindings.Add("Checked", this, "AutoRestart", false, DataSourceUpdateMode.OnPropertyChanged);
             this.CB_SplitOnMissionSuccess.DataBindings.Add("Checked", this, "SplitOnMissionSuccess", false, DataSourceUpdateMode.OnPropertyChanged);
+
+            this.AutoRestart = DEFAULT_AUTORESET;
+            this.AutoStart = DEFAULT_AUTOSTART;
+            this.SplitOnMissionSuccess = DEFAULT_SPLITONMISSIONSUCCESS;
+            this.CurrentSplits = new LevelRow[0];
             OnSplitsChanged(EventArgs.Empty);
         }
 
@@ -236,11 +241,14 @@ namespace LiveSplit.ThiefLGS
                         case (int)Presets.ThiefGold:
                             {
                                 ChkList_Splits.Fill(thief1Rows);
+                                OnSplitsChanged(EventArgs.Empty);
+
                                 break;
                             }
                         case (int)Presets.Thief2:
                             {
                                 ChkList_Splits.Fill(thief2Rows);
+                                OnSplitsChanged(EventArgs.Empty);
                                 break;
                             }
                         default:

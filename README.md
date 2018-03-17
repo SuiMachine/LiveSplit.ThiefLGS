@@ -10,7 +10,7 @@ Features
 Requirements
 ------------
 
-  * Thief: Gold (or The Dark Project) in versions
+  * Thief: Gold, Thief: The Dark Project or Thief 2: The Metal Age with following engine versions:
   	* NewDark 1.21
 	* NewDark 1.22 (TFix 1.20)
 	* NewDark 1.25 (TFix 1.25d)

@@ -44,7 +44,6 @@ namespace LiveSplit.ThiefLGS
 
         private void _settings_SplitsChanged(object sender, EventArgs e)
         {
-            Debug.WriteLine(string.Format("[NO LOADS] Splits changed. Updating GameMemory reader (a total of {0} splits and longest name of {1} characters).", Splits != null ? Splits.Length : 0, StringReadLenght));
             if(_settings.CurrentSplits != null)
             {
                 Splits = _settings.CurrentSplits;
@@ -56,6 +55,8 @@ namespace LiveSplit.ThiefLGS
                 }
                 SplitOnLastSplit = _settings.SplitOnMissionSuccess;
             }
+            Debug.WriteLine(string.Format("[NO LOADS] Splits changed. Updating GameMemory reader (a total of {0} splits and longest name of {1} characters).", Splits != null ? Splits.Length : 0, StringReadLenght));
+
         }
 
         private int FindLongest(LevelRow[] splits)
