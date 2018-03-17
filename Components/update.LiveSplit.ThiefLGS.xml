@@ -1,44 +1,13 @@
 <updates>
-	<update version="1.3.0">
+	<update version="0.9.0">
 		<files>
-			<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
+			<file path="Components/LiveSplit.ThiefLGS.dll" status="changed"/>
 		</files>
 		<changelog>
-			<change>Added support for exe version 1.23 (NewDark), 1.21 (NewDark), 1.18 (Thief 2 Old Dark).</change>
-		</changelog>
-	</update>
-	<update version="1.2.0">
-		<files>
-			<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
-		</files>
-		<changelog>
-			<change>Added support for exe version 1.37 (Old DarkEngine with DDfix).</change>
-		</changelog>
-	</update>
-	<update version="1.1.0">
-		<files>
-			<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
-		</files>
-		<changelog>
-			<change>Added reading map name from memory.</change>
-			<change>Added auto-splitting together with options.</change>
-			<change>Added auto-start option.</change>
-		</changelog>
-	</update>
-	<update version="1.0.1">
-		<files>
-			<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
-		</files>
-		<changelog>
-			<change>Migrated write, alloc functions to LiveSplit\'s ComponentUtil Extensions in hopes that solves issues with reading from memory, when the game's process is allocated past first 32bit of memory.</change>
-		</changelog>
-	</update>
-	<update version="1.0.0">
-		<files>
-			<file path="Components/LiveSplit.Thief1.dll" status="changed"/>
-		</files>
-		<changelog>
-			<change>Initial release.</change>
+			<change>Migrated to new name to better describe support for Thief and Thief 2.</change>
+			<change>Totally reworked memory reading in hopes of bypassing some issues with code being rehooked on memory read failure.</change>
+			<change>Reworked settings forms to allow for greater flexibility.</change>
+			<change>Added an ability to split on last mission success (NewDark only).</change>
 		</changelog>
 	</update>
 </updates>

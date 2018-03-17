@@ -65,7 +65,7 @@ namespace LiveSplit.ThiefLGS
 
         public string UpdateURL
         {
-            get { return "https://raw.githubusercontent.com/SuiMachine/LiveSplit.Thief/master/"; }
+            get { return "https://raw.githubusercontent.com/SuiMachine/LiveSplit.ThiefLGS/master/"; }
         }
 
         public Version Version
