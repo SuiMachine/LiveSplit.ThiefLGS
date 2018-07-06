@@ -14,6 +14,7 @@ namespace LiveSplit.ThiefLGS
         public event EventHandler OnPlayerGainedControl;
         public event EventHandler OnLoadStarted;
         public event EventHandler OnLoadFinished;
+        public event EventHandler OnFirstLevelLoading;
         public delegate void SplitCompletedEventHandler(object sender, int SplitIndex, uint frame);
         public event SplitCompletedEventHandler OnSplitCompleted;
 
@@ -33,6 +34,15 @@ namespace LiveSplit.ThiefLGS
         public bool SplitOnLastSplit { get; set; }
         public LevelRow[] Splits { get; set; }
         public bool[] SplitStates { get; set; }
+
+        public void ResetSplitStates()
+        {
+            for (int i = 0; i < (int)SplitStates.Length; i++)
+            {
+                SplitStates[i] = false;
+            }
+
+        }
 
 
         public GameMemory(ThiefSettings componentSettings)
@@ -54,6 +64,8 @@ namespace LiveSplit.ThiefLGS
                     SplitStates[i] = false;
                 }
                 SplitOnLastSplit = _settings.SplitOnMissionSuccess;
+
+                ResetSplitStates();
             }
             Debug.WriteLine(string.Format("[NO LOADS] Splits changed. Updating GameMemory reader (a total of {0} splits and longest name of {1} characters).", Splits != null ? Splits.Length : 0, StringReadLenght));
 
@@ -140,6 +152,8 @@ namespace LiveSplit.ThiefLGS
                         string tempRead = _levelName.ReadString(StringReadLenght, SuisReader.StringType.UTF8).ToString();
                         if(tempRead != "")
                             CurrentMap = tempRead.ToLower();
+                        if (CurrentMap.EndsWith(".mis"))
+                            CurrentMap = CurrentMap.Substring(0, CurrentMap.Length - 4);
 
                         if(isLoading != prevIsLoading)
                         {
@@ -166,6 +180,7 @@ namespace LiveSplit.ThiefLGS
                                 {
                                     loadingStarted = false;
 
+
                                     // unpause game timer
                                     _uiThread.Post(d =>
                                     {
@@ -183,6 +198,7 @@ namespace LiveSplit.ThiefLGS
                                     {
                                         if(this.OnPlayerGainedControl != null)
                                         {
+                                            this.OnFirstLevelLoading(this, EventArgs.Empty);
                                             this.OnPlayerGainedControl(this, EventArgs.Empty);
                                         }
                                     }, null);

@@ -1,4 +1,15 @@
 <updates>
+	<update version="0.9.1">
+		<files>
+			<file path="Components/LiveSplit.ThiefLGS.dll" status="changed"/>
+		</files>
+		<changelog>
+			<change>Added event for restarting split states (so that autosplitter no longer remembers previous runs splits after timer reset).</change>
+			<change>Added an option to automatically restart splits on first level load (careful as it will reset on save load as well!).</change>
+			<change>Improved string handling - now, even if level is read with an extension, it will be removed before comparing level names - this means level names should be provided without extension as well.</change>
+			<change>Reworked Thief 2 preset, so it now features maps in proper order (which was botched by LGS).</change>
+		</changelog>
+	</update>
 	<update version="0.9.0">
 		<files>
 			<file path="Components/LiveSplit.ThiefLGS.dll" status="changed"/>

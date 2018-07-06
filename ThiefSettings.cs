@@ -44,38 +44,40 @@ namespace LiveSplit.ThiefLGS
         private const bool DEFAULT_SPLITONMISSIONSUCCESS = true;
 
         private LevelRow[] thief1Rows = new LevelRow[] {
-            new LevelRow(true, "miss1.mis"),
-            new LevelRow(true, "miss2.mis"),
-            new LevelRow(true, "miss3.mis"),
-            new LevelRow(true, "miss4.mis"),
-            new LevelRow(true, "miss5.mis"),
-            new LevelRow(true, "miss15.mis"),
-            new LevelRow(true, "miss6.mis"),
-            new LevelRow(true, "miss7.mis"),
-            new LevelRow(true, "miss16.mis"),
-            new LevelRow(true, "miss9.mis"),
-            new LevelRow(true, "miss17.mis"),
-            new LevelRow(true, "miss10.mis"),
-            new LevelRow(true, "miss11.mis"),
-            new LevelRow(true, "miss12.mis"),
-            new LevelRow(true, "miss13.mis"),
-            new LevelRow(true, "miss14.mis")
+            new LevelRow(true, "miss1"),
+            new LevelRow(true, "miss2"),
+            new LevelRow(true, "miss3"),
+            new LevelRow(true, "miss4"),
+            new LevelRow(true, "miss5"),
+            new LevelRow(true, "miss15"),
+            new LevelRow(true, "miss6"),
+            new LevelRow(true, "miss7"),
+            new LevelRow(true, "miss16"),
+            new LevelRow(true, "miss9"),
+            new LevelRow(true, "miss17"),
+            new LevelRow(true, "miss10"),
+            new LevelRow(true, "miss11"),
+            new LevelRow(true, "miss12"),
+            new LevelRow(true, "miss13"),
+            new LevelRow(true, "miss14")
         };
 
         private LevelRow[] thief2Rows = new LevelRow[] {
-            new LevelRow(true, "miss1.mis"),
-            new LevelRow(true, "miss2.mis"),
-            new LevelRow(true, "miss3.mis"),
-            new LevelRow(true, "miss4.mis"),
-            new LevelRow(true, "miss5.mis"),
-            new LevelRow(true, "miss6.mis"),
-            new LevelRow(true, "miss7.mis"),
-            new LevelRow(true, "miss8.mis"),
-            new LevelRow(true, "miss9.mis"),
-            new LevelRow(true, "miss10.mis"),
-            new LevelRow(true, "miss11.mis"),
-            new LevelRow(true, "miss12.mis"),
-            new LevelRow(true, "miss13.mis")
+            new LevelRow(true, "miss1"),
+            new LevelRow(true, "miss2"),
+            new LevelRow(true, "miss4"),
+            new LevelRow(true, "miss5"),
+            new LevelRow(true, "miss6"),
+            new LevelRow(true, "miss7"),
+            new LevelRow(true, "miss9"),
+            new LevelRow(true, "miss8"),
+            new LevelRow(true, "miss10"),
+            new LevelRow(true, "miss11"),
+            new LevelRow(true, "miss14"),
+            new LevelRow(true, "miss15"),
+            new LevelRow(true, "miss12"),
+            new LevelRow(true, "miss13"),
+            new LevelRow(true, "miss16")
         };
 
         public ThiefSettings()

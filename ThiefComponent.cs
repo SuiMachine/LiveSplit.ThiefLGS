@@ -40,12 +40,14 @@ namespace LiveSplit.ThiefLGS
             _gameMemory = new GameMemory(this.Settings);
             _gameMemory.OnLoadStarted += GameMemory_OnLoadStarted;
             _gameMemory.OnLoadFinished += GameMemory_OnLoadFinished;
+            _gameMemory.OnFirstLevelLoading += GameMemory_OnFirstLevelLoading;
             _gameMemory.OnPlayerGainedControl += GameMemory_OnPlayerGainedControl;
             _gameMemory.OnSplitCompleted += GameMemory_OnSplitCompleted;
 
             state.OnStart += State_OnStart;
             _gameMemory.StartMonitoring();
         }
+
 
         public override void Dispose()
         {
@@ -61,7 +63,10 @@ namespace LiveSplit.ThiefLGS
 
         }
 
-        private void State_OnStart(object sender, EventArgs e) => _timer.InitializeGameTime();
+        private void State_OnStart(object sender, EventArgs e)
+        {
+            _gameMemory.ResetSplitStates();
+        }
 
         private void Timer_OnStart(object sender, EventArgs e) => _timer.InitializeGameTime();
 
